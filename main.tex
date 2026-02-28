@@ -1,0 +1,61 @@
+\documentclass[a4paper,10pt]{article}
+
+% Idioma
+\usepackage[english,brazil]{babel}
+
+% Fonte e layout (XeLaTeX)
+\usepackage{fontspec}
+\setmainfont{Arial}
+
+% Margens
+\usepackage[top=15mm,bottom=25mm,left=20mm,right=20mm]{geometry}
+
+% Detalhes estéticos
+\usepackage[table]{xcolor}
+
+% Espaçamento
+\usepackage{setspace}
+\onehalfspacing
+\setlength{\parskip}{6pt}
+\usepackage{indentfirst}
+
+% Seções
+\usepackage{titlesec}
+\titleformat{\section}
+  {\fontsize{12pt}{12pt}\bfseries}
+  {\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\fontsize{12pt}{14pt}\bfseries}
+  {\thesubsection}{1em}{}
+
+
+% Matemática e figuras
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{array}
+
+% Referências
+\usepackage{csquotes}
+\usepackage[hidelinks]{hyperref}
+\usepackage[
+    style=abnt,
+    backend=biber
+]{biblatex}
+\addbibresource{referencias.bib}
+
+\begin{document}
+
+\input{sections/00-capa.tex}
+
+\input{sections/01-introducao.tex}
+\input{sections/02-objetivos.tex}
+\input{sections/03-metodologia.tex}
+\input{sections/04-resultados_e_discussao.tex}
+\input{sections/05-conclusoes.tex}
+\input{sections/06-dificuldade_encontradas.tex}
+\input{sections/07-atividades_paralelas.tex}
+
+\printbibliography
+
+\end{document}
