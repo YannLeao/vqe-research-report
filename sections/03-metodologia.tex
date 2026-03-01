@@ -1,57 +1,209 @@
 \section{Metodologia}
 
-A metodologia adotada neste trabalho foi estruturada de modo a garantir a aquisição progressiva de competências teóricas e práticas necessárias à implementação do algoritmo Variational Quantum Eigensolver (VQE), bem como assegurar a reprodutibilidade e validação dos resultados obtidos durante os dois primeiros trimestres de execução do projeto.
+A presente etapa do projeto concentrou-se na consolidação teórica e na
+implementação de uma prova de conceito computacional voltada à aplicação
+de algoritmos quânticos variacionais na simulação de sistemas moleculares.
+Dessa forma, a metodologia adotada foi estruturada de modo a integrar
+capacitação conceitual, domínio de ferramentas computacionais e
+implementação prática do algoritmo Variational Quantum Eigensolver (VQE),
+permitindo a compreensão completa do fluxo híbrido quântico-clássico
+característico dos algoritmos da era NISQ.
 
-O desenvolvimento das atividades foi organizado em etapas complementares, envolvendo capacitação teórica, definição do ambiente computacional, implementação do algoritmo variacional e validação dos resultados por comparação com métodos clássicos consolidados.
+\subsection{Consolidação teórica e capacitação técnica}
 
-\subsection{Capacitação Teórica}
+Inicialmente, realizou-se um processo sistemático de estudo dos fundamentos
+da computação quântica, algoritmos variacionais e métodos de simulação
+molecular. Essa etapa constituiu parte central das atividades desenvolvidas,
+uma vez que o objetivo principal desta fase do projeto consistiu na
+consolidação conceitual necessária para futuras aplicações em problemas
+de interesse na área de materiais energéticos.
 
-A consolidação dos fundamentos de computação quântica foi realizada por meio da disciplina ``Computação Quântica'', ofertada na Unidade Acadêmica de Belo Jardim (UFRPE) e ministrada pelo orientador do projeto, Prof. Dr. Fábio Magalhães de Novaes Santos. 
+A consolidação dos fundamentos de computação quântica foi realizada por meio 
+da disciplina ``Computação Quântica'', ofertada na Unidade Acadêmica de Belo 
+Jardim (UFRPE) e ministrada pelo orientador do projeto, Prof. Dr. Fábio 
+Magalhães de Novaes Santos. 
+Os fundamentos foram consolidados por meio de formação formal na disciplina 
+desde os fundamentos matemáticos da mecânica quântica, incluindo 
+notação de Dirac e representação vetorial de estados 
+quânticos, até algoritmos quânticos fundamentais, como os algoritmos de 
+Grover e Shor, além de tópicos avançados relacionados à simulação quântica e 
+caminhadas quânticas, por exemplo. Essa formação ocorreu simultaneamente ao 
+desenvolvimento da iniciação científica, contribuindo diretamente para a 
+compreensão dos modelos computacionais empregados neste trabalho.
 
-A disciplina abordou desde os fundamentos matemáticos formais da mecânica quântica, incluindo notação de Dirac e representação vetorial de estados quânticos, até algoritmos quânticos fundamentais, como os algoritmos de Grover e Shor, além de tópicos avançados relacionados à simulação quântica e caminhadas quânticas, por exemplo. Essa formação ocorreu simultaneamente ao desenvolvimento da iniciação científica, contribuindo diretamente para a compreensão dos modelos computacionais empregados neste trabalho.
+Foram utilizados como referências principais textos clássicos da área de
+computação quântica \cite{nielsen2000quantum,hidary2019quantum}, bem como
+artigos de revisão sobre algoritmos variacionais e computação quântica
+aplicada à química molecular. Paralelamente, foi realizado o acompanhamento
+do curso educacional \textit{Quantum Chemistry with VQE}, disponibilizado
+pela plataforma IBM Quantum Learning \cite{ibm_vqe_course}, o qual apresenta
+de forma estruturada as etapas necessárias para implementação do algoritmo
+VQE em problemas de estrutura eletrônica. 
+Essa etapa permitiu o domínio conceitual dos elementos fundamentais do
+pipeline variacional, incluindo construção do Hamiltoniano molecular,
+definição de estados variacionais, estratégias de medição e métodos de
+otimização clássica.
 
-Os conhecimentos relacionados à química quântica e aos algoritmos variacionais foram adquiridos de forma complementar por meio de estudo dirigido baseado em materiais especializados disponíveis em plataformas acadêmicas abertas, documentação técnica e tutoriais oficiais de computação quântica aplicada à simulação molecular. Essa abordagem permitiu a construção gradual do entendimento necessário para a modelagem de Hamiltonianos moleculares e aplicação de métodos variacionais híbridos quântico-clássicos.
+\subsection{Ambiente computacional e ferramentas utilizadas}
 
-\subsection{Ferramentas Computacionais Utilizadas}
+Conforme previsto no plano de trabalho inicial, foram consideradas as 
+plataformas Ket, QuBox e Qiskit para a realização das simulações quânticas. 
+Entretanto, durante a fase de implementação, observou-se que o ecossistema 
+desenvolvido pela IBM Quantum, baseado no framework Qiskit, apresenta 
+integração completa entre simulação local, execução em hardware quântico 
+real e ferramentas de química quântica variacional.
+Dessa forma, optou-se pela adoção prioritária do Qiskit como ambiente 
+unificado de desenvolvimento, permitindo a execução de todas as etapas 
+necessárias ao projeto sem perda metodológica ou experimental. Essa escolha 
+reduziu a complexidade do fluxo computacional e favoreceu uma maior 
+padronização dos experimentos realizados.
 
-Conforme previsto no plano de trabalho inicial, foram consideradas as plataformas Ket, QuBox e Qiskit para a realização das simulações quânticas. Entretanto, durante a fase de implementação, observou-se que o ecossistema desenvolvido pela IBM Quantum, baseado no framework Qiskit, apresenta integração completa entre simulação local, execução em hardware quântico real e ferramentas de química quântica variacional.
+As simulações foram executadas exclusivamente em simuladores quânticos
+clássicos disponibilizados pelo Qiskit Aer, possibilitando a análise
+do comportamento ideal do algoritmo na ausência de ruídos experimentais.
+Essa escolha permitiu isolar aspectos conceituais e metodológicos do
+algoritmo, priorizando a compreensão do seu funcionamento interno.
 
-Dessa forma, optou-se pela adoção prioritária do Qiskit como ambiente unificado de desenvolvimento, permitindo a execução de todas as etapas necessárias ao projeto sem perda metodológica ou experimental. Essa escolha reduziu a complexidade do fluxo computacional e favoreceu uma maior padronização dos experimentos realizados.
+\subsection{Formulação do problema molecular}
 
-As implementações seguiram os tutoriais oficiais disponibilizados pela plataforma IBM Quantum Learning, particularmente o curso ``Quantum Chemistry with VQE'', que descreve de forma sistemática as etapas de construção do Hamiltoniano molecular, definição do ansatz variacional, aplicação de otimizadores clássicos e determinação do estado fundamental molecular \cite{ibm_vqe_course}.
+Como sistemas modelo para implementação do algoritmo foram selecionadas
+as moléculas de hidrogênio (H$_2$) e hidreto de lítio (LiH), amplamente
+empregadas na literatura como benchmarks em simulações quânticas devido
+à sua baixa complexidade computacional e estrutura eletrônica bem
+caracterizada.
 
-\subsection{Implementação do Algoritmo VQE}
+\subsubsection{Definição geométrica e base atômica}
 
-A implementação inicial do algoritmo Variational Quantum Eigensolver foi realizada utilizando a molécula de hidrogênio (H$_2$) e do hidreto de lítio (LiH) como sistemas modelos, devido à sua baixa complexidade computacional e ampla utilização como benchmark em simulações quânticas.
+As geometrias moleculares foram definidas explicitamente por meio
+das coordenadas cartesianas dos núcleos atômicos. No caso da
+molécula de hidrogênio, os átomos foram posicionados
+simetricamente em relação à origem, separados por uma distância
+internuclear de 0,735 Å, valor próximo ao comprimento de ligação
+de equilíbrio experimental.
+Para ambas as moléculas foi adotada a base atômica STO-6G,
+base mínima amplamente utilizada em estudos introdutórios
+por reduzir o custo computacional mantendo as características
+essenciais da estrutura eletrônica.
 
-O processo metodológico envolveu as seguintes etapas:
+\subsubsection{Cálculo eletrônico clássico e espaço ativo}
+
+A estrutura eletrônica inicial foi obtida por meio do método
+Hartree–Fock restrito (RHF), implementado na biblioteca PySCF.
+Em seguida, foi empregado o método CASCI (Complete Active Space
+Configuration Interaction), permitindo definir explicitamente
+um espaço ativo contendo os orbitais moleculares mais relevantes
+para a descrição da correlação eletrônica.
+
+No caso da molécula de hidrogênio, foram considerados dois
+orbitais ativos com dois elétrons no espaço ativo,
+enquanto para o LiH foi adotado um espaço ativo ampliado,
+compatível com sua maior complexidade eletrônica.
+A seleção dos orbitais ativos foi realizada com base na
+simetria molecular, garantindo consistência física na
+descrição do sistema.
+
+\subsubsection{Construção do Hamiltoniano eletrônico}
+
+A partir do cálculo CASCI foram extraídos:
 
 \begin{itemize}
-
-\item construção do Hamiltoniano molecular a partir da geometria da molécula;
-
-\item mapeamento do problema eletrônico para operadores quânticos compatíveis com circuitos variacionais;
-
-\item definição de um ansatz parametrizado representando o estado quântico candidato;
-
-\item aplicação de algoritmos clássicos de otimização para minimização da energia esperada;
-
-\item execução iterativa do circuito quântico em simuladores locais e, quando disponível, em hardware quântico real da plataforma IBM Quantum.
-
+\item os integrais de um elétron ($h_{pq}$);
+\item os integrais de dois elétrons ($h_{pqrs}$);
+\item a energia de núcleo efetiva ($E_{\text{core}}$).
 \end{itemize}
 
-O fluxo híbrido quântico-clássico foi implementado conforme as boas práticas descritas na literatura recente sobre algoritmos variacionais.
+Os termos de dois elétrons foram submetidos a uma decomposição
+de Cholesky de baixo posto, procedimento que permite fatorar o
+tensor eletrônico reduzindo a complexidade computacional da
+construção do Hamiltoniano.
+Essa etapa resulta em uma representação eficiente do Hamiltoniano
+fermiónico, posteriormente mapeado para operadores de spin por
+meio da transformação de Jordan–Wigner, viabilizando sua execução
+em dispositivos quânticos digitais.
 
-\subsection{Estratégia de Validação dos Resultados}
+\subsection{Implementação do algoritmo Variational Quantum Eigensolver}
 
-A validação dos resultados obtidos foi conduzida por meio da comparação entre as energias moleculares estimadas pelo algoritmo VQE e valores obtidos por métodos clássicos de química computacional.
+A implementação do algoritmo VQE foi conduzida com base no fluxo
+metodológico consolidado na literatura recente e no material
+educacional disponibilizado pela IBM Quantum, sendo adaptada
+para fins de consolidação conceitual e reprodutibilidade computacional.
 
-Para esse fim, foi adotado o software ORCA, amplamente utilizado na literatura científica para cálculos eletrônicos de alta precisão. As simulações clássicas foram utilizadas como referência para avaliação da convergência e consistência dos resultados quânticos.
+\subsubsection{Construção do Hamiltoniano eletrônico}
 
-As comparações foram planejadas por meio da análise quantitativa das energias obtidas, pois podem ser representadas graficamente em função do número de iterações do algoritmo variacional bem como dos parâmetros geométricos da molécula.
+A geometria molecular dos sistemas H$_2$ e LiH foi inicialmente
+definida e utilizada para a construção do Hamiltoniano eletrônico
+em segunda quantização, empregando o módulo Qiskit Nature.
+Os integrais eletrônicos foram obtidos na base atômica mínima
+STO-3G, escolha amplamente adotada em estudos introdutórios por
+reduzir o custo computacional mantendo a estrutura física essencial
+do problema.
+O Hamiltoniano fermiónico resultante foi então mapeado para operadores
+de spin por meio da transformação de Jordan–Wigner, permitindo sua
+representação como combinação linear de operadores de Pauli
+mensuráveis em dispositivos quânticos digitais.
 
-\subsection{Organização Computacional e Reprodutibilidade}
+\subsubsection{Definição do ansatz variacional}
 
-Com o objetivo de garantir transparência científica e reprodutibilidade dos experimentos, todo o desenvolvimento computacional foi organizado em repositório público versionado utilizando o sistema Git.
+Para a construção do estado variacional parametrizado, foi adotado
+um \textit{hardware-efficient ansatz}, conforme proposto no tutorial
+da IBM Quantum. Essa escolha justifica-se por sua adequação ao regime
+NISQ, uma vez que tais circuitos apresentam baixa profundidade e
+estrutura compatível com conectividades típicas de processadores
+quânticos atuais.
+O circuito parametrizado atua sobre o estado de referência de
+Hartree–Fock, introduzindo rotações parametrizadas e camadas
+de portas de entrelaçamento, produzindo estados candidatos ao
+estado fundamental do sistema molecular. O número de camadas
+foi mantido reduzido, de modo a equilibrar expressividade e
+estabilidade numérica do processo de otimização.
 
-Os códigos-fonte, notebooks experimentais e registros das simulações foram estruturados de forma modular, permitindo a reprodução integral das etapas metodológicas descritas neste trabalho. O repositório também funciona como ambiente de documentação contínua das atividades desenvolvidas durante a vigência da iniciação científica.
+\subsubsection{Loop híbrido quântico-clássico}
+
+O núcleo do algoritmo consiste em um ciclo iterativo híbrido,
+ilustrado na Figura~\ref{fig:vqe_cycle}, no qual:
+\begin{itemize}
+\item o circuito quântico prepara o estado variacional;
+\item medições são realizadas para estimativa do valor esperado
+da energia por meio da decomposição do Hamiltoniano em operadores
+de Pauli;
+\item um otimizador clássico atualiza os parâmetros variacionais;
+\item o processo é repetido até a convergência da função custo.
+\end{itemize}
+
+Essa arquitetura híbrida explora a complementaridade entre a
+capacidade de dispositivos quânticos prepararem estados altamente
+entrelaçados e a eficiência de algoritmos clássicos na otimização
+numérica, característica central dos algoritmos variacionais na
+era NISQ.
+
+\subsubsection{Otimização clássica}
+
+A minimização da energia esperada foi realizada por meio do
+otimizador clássico COBYLA (Constrained Optimization BY Linear
+Approximations), conforme implementado no Qiskit.
+A escolha do COBYLA justifica-se por tratar-se de um método
+livre de derivadas, adequado para funções custo estimadas por
+medições quânticas sujeitas a ruído estatístico. Esse método
+apresenta boa estabilidade em problemas de baixa dimensionalidade,
+como no caso das moléculas consideradas.
+O critério de parada adotado baseou-se na convergência da energia
+e no número máximo de iterações previamente definido.
+
+\subsection{Execução das simulações}
+
+As execuções foram realizadas utilizando o simulador de estado
+vetorial do Qiskit Aer, permitindo a obtenção exata do valor
+esperado da energia sem a introdução de ruído estatístico
+associado a amostragem finita de medições.
+
+Inicialmente, a metodologia foi reproduzida para a molécula
+de hidrogênio (H$_2$), conforme apresentado no material de
+referência da IBM Quantum, com o objetivo de validação da
+implementação. Em seguida, o procedimento foi estendido para
+o hidreto de lítio (LiH), permitindo avaliar o comportamento
+do algoritmo diante de um sistema molecular de maior complexidade.
+Os resultados foram analisados em termos de convergência do
+processo variacional, estabilidade do otimizador e aproximação
+obtida para a energia do estado fundamental, caracterizando a
+implementação como uma prova de conceito do fluxo computacional
+do VQE em ambiente controlado.
