@@ -1,1 +1,37 @@
 \section{Dificuldades Encontradas}
+
+Durante o desenvolvimento do projeto, uma das principais dificuldades 
+encontradas esteve relacionada à gestão de dependências do ecossistema 
+\textit{Qiskit}, particularmente na integração entre os módulos 
+\textit{qiskit}, \textit{qiskit-nature} e \textit{qiskit-algorithms}. Por se 
+tratar de um framework em constante evolução, com atualizações frequentes e 
+mudanças estruturais significativas (especialmente após a consolidação da 
+versão 1.0), observou-se um desencontro de versionamento interno entre 
+bibliotecas interdependentes.
+Especificamente, ao utilizar rotinas do \textit{Qiskit Nature} para a 
+obtenção da energia exata via \textit{Full Configuration Interaction} (FCI), 
+ocorreu uma falha de importação associada à classe \texttt{BaseEstimator}, 
+removida das versões mais recentes do módulo \textit{qiskit.primitives}. 
+Embora o projeto não utilizasse diretamente funcionalidades de estados 
+excitados ou do método QEOM, o erro era acionado por dependências internas 
+do pacote, evidenciando como alterações estruturais em camadas não 
+utilizadas diretamente podem impactar o funcionamento global do sistema.
+
+Esse cenário ilustra uma característica recorrente em áreas de fronteira 
+tecnológica: a rápida evolução dos frameworks pode introduzir instabilidades 
+temporárias de compatibilidade entre módulos. A resolução adotada consistiu 
+em reformular a estratégia de obtenção da energia de referência. Em vez de 
+empregar o \textit{GroundStateEigensolver} do \textit{Qiskit Nature}, optou-
+se por realizar a diagonalização exata diretamente sobre o Hamiltoniano 
+mapeado em qubits, utilizando o \textit{NumPyMinimumEigensolver}. 
+Do ponto de vista físico e matemático, essa abordagem é equivalente ao 
+cálculo de FCI, uma vez que corresponde à obtenção do menor autovalor do 
+operador Hamiltoniano no espaço completo de Fock mapeado. Além de contornar 
+o problema de dependência interna, essa solução tornou o pipeline 
+computacional mais direto, reduzindo camadas intermediárias e aumentando a 
+robustez do código frente a futuras atualizações do framework.
+
+Assim, a principal dificuldade encontrada não esteve associada aos 
+fundamentos físicos ou ao método variacional em si, mas sim à engenharia de 
+software em um ambiente de desenvolvimento ativo e em transformação contínua,
+aspecto característico da computação quântica contemporânea.

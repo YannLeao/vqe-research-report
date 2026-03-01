@@ -1,1 +1,63 @@
 \section{Conclusões}
+
+A presente etapa da iniciação científica teve como objetivo principal a 
+consolidação teórica, metodológica e computacional da aplicação de 
+algoritmos quânticos variacionais à simulação de sistemas moleculares, 
+utilizando o algoritmo Variational Quantum Eigensolver (VQE) como estudo de 
+caso. Os resultados obtidos demonstram que a implementação desenvolvida foi 
+capaz de reproduzir com elevada precisão a energia do estado fundamental da 
+molécula de hidrogênio (H$_2$), validando o correto funcionamento do fluxo 
+híbrido quântico--clássico adotado e confirmando a consistência da 
+metodologia empregada.
+
+A extensão do procedimento para o sistema LiH evidenciou limitações 
+relevantes associadas à escalabilidade do VQE em sistemas moleculares de 
+maior complexidade eletrônica. O aumento do erro variacional e a ausência de 
+convergência estável indicam que a expressividade do \textit{ansatz} 
+\textit{hardware-efficient} e a estratégia de otimização clássica utilizada 
+tornam-se fatores críticos à medida que cresce a dimensionalidade do espaço 
+variacional. Dessa forma, os resultados não apenas confirmam a viabilidade 
+do método em sistemas simples, mas também reproduzem, em ambiente 
+controlado, desafios característicos da era NISQ, especialmente aqueles 
+relacionados ao equilíbrio entre profundidade de circuito, número de 
+parâmetros e estabilidade do processo de otimização.
+
+Sob a perspectiva metodológica, o projeto resultou na implementação completa 
+e reprodutível do \textit{pipeline} de simulação molecular baseado em VQE, 
+incluindo construção do Hamiltoniano eletrônico, mapeamento férmion--qubit, 
+definição de estados variacionais, execução do ciclo híbrido de otimização e 
+validação clássica por meio de diagonalização exata. A organização 
+sistemática dos experimentos em repositório público versionado estabelece 
+uma base computacional consistente para a continuidade do projeto, 
+garantindo transparência científica e extensibilidade das simulações 
+realizadas.
+
+Os resultados obtidos nesta fase caracterizam, portanto, uma prova de 
+conceito bem-sucedida da aplicação de algoritmos variacionais em simulação 
+molecular, estabelecendo as condições necessárias para avanços em direção à 
+modelagem de sistemas de maior relevância tecnológica associados ao 
+desenvolvimento de materiais para armazenamento de energia.
+
+Como continuidade natural do projeto, destacam-se os seguintes 
+direcionamentos futuros:
+
+\begin{itemize}
+    \item investigação de \textit{ansätze} quimicamente inspirados, como Unitary Coupled Cluster (UCC) e abordagens adaptativas, visando maior capacidade de representação da correlação eletrônica;
+    
+    \item avaliação de diferentes estratégias de otimização clássica, incluindo métodos baseados em gradiente e técnicas híbridas mais robustas;
+    
+    \item aplicação de técnicas de mitigação de ruído e execução das simulações em hardware quântico real disponibilizado pela plataforma IBM Quantum;
+    
+    \item extensão das simulações para moléculas maiores e sistemas eletrônicos mais representativos de materiais relevantes para tecnologias de armazenamento de energia;
+    
+    \item integração de técnicas de aprendizado de máquina para aceleração do processo variacional, predição de parâmetros iniciais e análise da paisagem de otimização;
+    
+    \item realização de estudos comparativos sistemáticos entre simulações quânticas variacionais e métodos clássicos consolidados de química computacional.
+\end{itemize}
+
+Dessa forma, os resultados obtidos estabelecem uma infraestrutura 
+experimental reutilizável. A etapa atual do projeto cumpre o papel de 
+estabelecer os fundamentos científicos e computacionais necessários para 
+investigações futuras voltadas à utilização integrada de computação quântica 
+e aprendizado de máquina na descoberta e otimização de materiais energéticos 
+avançados.

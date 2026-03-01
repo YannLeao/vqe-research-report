@@ -66,144 +66,91 @@ algoritmo, priorizando a compreensão do seu funcionamento interno.
 
 \subsection{Formulação do problema molecular}
 
-Como sistemas modelo para implementação do algoritmo foram selecionadas
-as moléculas de hidrogênio (H$_2$) e hidreto de lítio (LiH), amplamente
-empregadas na literatura como benchmarks em simulações quânticas devido
-à sua baixa complexidade computacional e estrutura eletrônica bem
-caracterizada.
+Foram selecionadas como sistemas modelo as moléculas de hidrogênio (H$_2$) e 
+hidreto de lítio (LiH), amplamente utilizadas na literatura como benchmarks 
+em simulações quânticas devido à sua simplicidade estrutural e relevância na 
+validação de algoritmos variacionais.
 
 \subsubsection{Definição geométrica e base atômica}
 
-As geometrias moleculares foram definidas explicitamente por meio
-das coordenadas cartesianas dos núcleos atômicos. No caso da
-molécula de hidrogênio, os átomos foram posicionados
-simetricamente em relação à origem, separados por uma distância
-internuclear de 0,735 Å, valor próximo ao comprimento de ligação
-de equilíbrio experimental.
-Para ambas as moléculas foi adotada a base atômica STO-6G,
-base mínima amplamente utilizada em estudos introdutórios
-por reduzir o custo computacional mantendo as características
-essenciais da estrutura eletrônica.
-
-\subsubsection{Cálculo eletrônico clássico e espaço ativo}
-
-A estrutura eletrônica inicial foi obtida por meio do método
-Hartree–Fock restrito (RHF), implementado na biblioteca PySCF.
-Em seguida, foi empregado o método CASCI (Complete Active Space
-Configuration Interaction), permitindo definir explicitamente
-um espaço ativo contendo os orbitais moleculares mais relevantes
-para a descrição da correlação eletrônica.
-
-No caso da molécula de hidrogênio, foram considerados dois
-orbitais ativos com dois elétrons no espaço ativo,
-enquanto para o LiH foi adotado um espaço ativo ampliado,
-compatível com sua maior complexidade eletrônica.
-A seleção dos orbitais ativos foi realizada com base na
-simetria molecular, garantindo consistência física na
-descrição do sistema.
+As geometrias moleculares foram definidas por meio de coordenadas 
+cartesianas dos núcleos atômicos. Para a molécula de hidrogênio, foi adotada 
+uma distância internuclear de 0,735 Å, valor próximo ao comprimento de 
+ligação de equilíbrio experimental. 
+Em ambas as moléculas foi utilizada a base atômica mínima STO-3G, escolha 
+amplamente empregada em estudos introdutórios por reduzir significativamente 
+o custo computacional mantendo as principais características físicas do 
+sistema eletrônico.
 
 \subsubsection{Construção do Hamiltoniano eletrônico}
 
-A partir do cálculo CASCI foram extraídos:
-
-\begin{itemize}
-\item os integrais de um elétron ($h_{pq}$);
-\item os integrais de dois elétrons ($h_{pqrs}$);
-\item a energia de núcleo efetiva ($E_{\text{core}}$).
-\end{itemize}
-
-Os termos de dois elétrons foram submetidos a uma decomposição
-de Cholesky de baixo posto, procedimento que permite fatorar o
-tensor eletrônico reduzindo a complexidade computacional da
-construção do Hamiltoniano.
-Essa etapa resulta em uma representação eficiente do Hamiltoniano
-fermiónico, posteriormente mapeado para operadores de spin por
-meio da transformação de Jordan–Wigner, viabilizando sua execução
-em dispositivos quânticos digitais.
+A construção do Hamiltoniano eletrônico em segunda quantização foi realizada 
+por meio do módulo \textit{Qiskit Nature}, utilizando o \textit{PySCFDriver} 
+como interface para cálculo da estrutura eletrônica inicial via Hartree–Fock 
+restrito (RHF).
+O operador fermiónico resultante foi automaticamente gerado pelo framework e 
+posteriormente mapeado para operadores de spin por meio da transformação de 
+Jordan–Wigner, permitindo sua representação como combinação linear de 
+operadores de Pauli mensuráveis em dispositivos quânticos digitais.
+Para fins de comparação e validação dos resultados variacionais, a energia 
+exata do estado fundamental foi obtida utilizando o algoritmo clássico 
+\textit{NumPyMinimumEigensolver}, equivalente ao cálculo de FCI no espaço 
+eletrônico considerado.
 
 \subsection{Implementação do algoritmo Variational Quantum Eigensolver}
 
-A implementação do algoritmo VQE foi conduzida com base no fluxo
-metodológico consolidado na literatura recente e no material
-educacional disponibilizado pela IBM Quantum, sendo adaptada
-para fins de consolidação conceitual e reprodutibilidade computacional.
+\subsubsection{Definição do \textit{ansatz} variacional}
 
-\subsubsection{Construção do Hamiltoniano eletrônico}
-
-A geometria molecular dos sistemas H$_2$ e LiH foi inicialmente
-definida e utilizada para a construção do Hamiltoniano eletrônico
-em segunda quantização, empregando o módulo Qiskit Nature.
-Os integrais eletrônicos foram obtidos na base atômica mínima
-STO-3G, escolha amplamente adotada em estudos introdutórios por
-reduzir o custo computacional mantendo a estrutura física essencial
-do problema.
-O Hamiltoniano fermiónico resultante foi então mapeado para operadores
-de spin por meio da transformação de Jordan–Wigner, permitindo sua
-representação como combinação linear de operadores de Pauli
-mensuráveis em dispositivos quânticos digitais.
-
-\subsubsection{Definição do ansatz variacional}
-
-Para a construção do estado variacional parametrizado, foi adotado
-um \textit{hardware-efficient ansatz}, conforme proposto no tutorial
-da IBM Quantum. Essa escolha justifica-se por sua adequação ao regime
-NISQ, uma vez que tais circuitos apresentam baixa profundidade e
-estrutura compatível com conectividades típicas de processadores
-quânticos atuais.
-O circuito parametrizado atua sobre o estado de referência de
-Hartree–Fock, introduzindo rotações parametrizadas e camadas
-de portas de entrelaçamento, produzindo estados candidatos ao
-estado fundamental do sistema molecular. O número de camadas
-foi mantido reduzido, de modo a equilibrar expressividade e
-estabilidade numérica do processo de otimização.
+Foi adotado um \textit{ansatz} do tipo \textit{hardware-efficient}, 
+implementado por 
+meio da classe \textit{EfficientSU2} do Qiskit. Esse tipo de circuito 
+consiste em camadas de rotações parametrizadas intercaladas com portas de 
+entrelaçamento total (\textit{full entanglement}), sendo adequado ao regime 
+NISQ por apresentar profundidade moderada e boa capacidade expressiva.
+O número de repetições do bloco variacional foi fixado em duas camadas 
+(\textit{reps}=2), buscando equilíbrio entre expressividade do circuito e 
+estabilidade do processo de otimização.
 
 \subsubsection{Loop híbrido quântico-clássico}
 
-O núcleo do algoritmo consiste em um ciclo iterativo híbrido,
-ilustrado na Figura~\ref{fig:vqe_cycle}, no qual:
+O algoritmo VQE foi implementado utilizando a arquitetura híbrida padrão:
+
 \begin{itemize}
-\item o circuito quântico prepara o estado variacional;
-\item medições são realizadas para estimativa do valor esperado
-da energia por meio da decomposição do Hamiltoniano em operadores
-de Pauli;
-\item um otimizador clássico atualiza os parâmetros variacionais;
-\item o processo é repetido até a convergência da função custo.
+\item preparação do estado variacional parametrizado;
+\item estimativa do valor esperado da energia por meio de simulação ideal de 
+estado vetorial;
+\item atualização clássica dos parâmetros variacionais;
+\item repetição do processo até o critério de parada.
 \end{itemize}
 
-Essa arquitetura híbrida explora a complementaridade entre a
-capacidade de dispositivos quânticos prepararem estados altamente
-entrelaçados e a eficiência de algoritmos clássicos na otimização
-numérica, característica central dos algoritmos variacionais na
-era NISQ.
+A estimativa do valor esperado foi realizada utilizando o 
+\textit{StatevectorEstimator}, garantindo cálculo determinístico da energia 
+sem ruído estatístico.
 
 \subsubsection{Otimização clássica}
 
-A minimização da energia esperada foi realizada por meio do
-otimizador clássico COBYLA (Constrained Optimization BY Linear
-Approximations), conforme implementado no Qiskit.
-A escolha do COBYLA justifica-se por tratar-se de um método
-livre de derivadas, adequado para funções custo estimadas por
-medições quânticas sujeitas a ruído estatístico. Esse método
-apresenta boa estabilidade em problemas de baixa dimensionalidade,
-como no caso das moléculas consideradas.
-O critério de parada adotado baseou-se na convergência da energia
-e no número máximo de iterações previamente definido.
+A minimização da energia foi conduzida por meio do otimizador clássico 
+COBYLA, configurado com limite máximo de 200 iterações. O critério de parada 
+adotado baseou-se no número máximo de iterações definido, sendo 
+adicionalmente monitorada a estabilização da energia ao longo do processo 
+iterativo.
 
-\subsection{Execução das simulações}
+\subsection{Execução das simulações e análise dos dados}
 
-As execuções foram realizadas utilizando o simulador de estado
-vetorial do Qiskit Aer, permitindo a obtenção exata do valor
-esperado da energia sem a introdução de ruído estatístico
-associado a amostragem finita de medições.
+As simulações foram inicialmente realizadas para a molécula de hidrogênio 
+(H$_2$), com o objetivo de validar a implementação do fluxo híbrido. 
+Posteriormente, o procedimento foi estendido ao hidreto de lítio (LiH), 
+permitindo avaliar o comportamento do algoritmo diante de um sistema 
+molecular de maior complexidade eletrônica.
+Durante a execução do VQE, os valores da energia a cada iteração foram 
+registrados por meio de função de \textit{callback}, possibilitando a 
+análise detalhada da convergência do algoritmo.
 
-Inicialmente, a metodologia foi reproduzida para a molécula
-de hidrogênio (H$_2$), conforme apresentado no material de
-referência da IBM Quantum, com o objetivo de validação da
-implementação. Em seguida, o procedimento foi estendido para
-o hidreto de lítio (LiH), permitindo avaliar o comportamento
-do algoritmo diante de um sistema molecular de maior complexidade.
-Os resultados foram analisados em termos de convergência do
-processo variacional, estabilidade do otimizador e aproximação
-obtida para a energia do estado fundamental, caracterizando a
-implementação como uma prova de conceito do fluxo computacional
-do VQE em ambiente controlado.
+Os resultados finais, incluindo energia variacional, energia exata de 
+referência (FCI), erro absoluto e número de iterações, foram armazenados em 
+arquivos no formato CSV, garantindo reprodutibilidade e organização 
+sistemática dos dados para posterior geração de gráficos de convergência.
+A análise concentrou-se na taxa de convergência do algoritmo, estabilidade 
+do otimizador e precisão da energia estimada em relação ao valor exato, 
+caracterizando o estudo como uma prova de conceito do fluxo computacional do 
+VQE em ambiente controlado e ideal.
