@@ -18,23 +18,23 @@ uma vez que o objetivo principal desta fase do projeto consistiu na
 consolidação conceitual necessária para futuras aplicações em problemas
 de interesse na área de materiais energéticos.
 
-A consolidação dos fundamentos de computação quântica foi realizada por meio 
-da disciplina ``Computação Quântica'', ofertada na Unidade Acadêmica de Belo 
+Esta etapa foi realizada por meio 
+da participação na disciplina ``Computação Quântica'', ofertada na Unidade Acadêmica de Belo 
 Jardim (UFRPE) e ministrada pelo orientador do projeto, Prof. Dr. Fábio 
 Magalhães de Novaes Santos. 
-Os fundamentos foram consolidados por meio de formação formal na disciplina 
-desde os fundamentos matemáticos da mecânica quântica, incluindo 
+Na disciplia, estudamos os fundamentos matemáticos da mecânica quântica, incluindo 
 notação de Dirac e representação vetorial de estados 
 quânticos, até algoritmos quânticos fundamentais, como os algoritmos de 
 Grover e Shor, além de tópicos avançados relacionados à simulação quântica e 
-caminhadas quânticas, por exemplo. Essa formação ocorreu simultaneamente ao 
-desenvolvimento da iniciação científica, contribuindo diretamente para a 
-compreensão dos modelos computacionais empregados neste trabalho.
+caminhadas quânticas, por exemplo. Ao final da disciplina, apresentou-se um seminário sobre VQE para toda a turma, com a entrega de códigos Qiskit que implementam a versão padrão desse algoritmo para a molécula de H$_2$.
+% Essa formação ocorreu simultaneamente ao 
+% desenvolvimento da iniciação científica, contribuindo diretamente para a 
+% compreensão dos modelos computacionais empregados neste trabalho.
 
-Foram utilizados como referências principais textos clássicos da área de
+Na disciplina, foram utilizados como referências principais textos clássicos da área de
 computação quântica \cite{nielsen2000quantum,hidary2019quantum}, bem como
 artigos de revisão sobre algoritmos variacionais e computação quântica
-aplicada à química molecular. Paralelamente, foi realizado o acompanhamento
+aplicada à química molecular \cite{tilly2022variational,cao2019quantum}. Paralelamente, foi realizado o acompanhamento
 do curso educacional \textit{Quantum Chemistry with VQE}, disponibilizado
 pela plataforma IBM Quantum Learning \cite{ibm_vqe_course}, o qual apresenta
 de forma estruturada as etapas necessárias para implementação do algoritmo
@@ -47,11 +47,12 @@ otimização clássica.
 \subsection{Ambiente computacional e ferramentas utilizadas}
 
 Conforme previsto no plano de trabalho inicial, foram consideradas as 
-plataformas Ket, QuBox e Qiskit para a realização das simulações quânticas. 
+plataformas \textcite{quantumket}, QuBox e Qiskit para a realização das simulações quânticas. 
 Entretanto, durante a fase de implementação, observou-se que o ecossistema 
 desenvolvido pela IBM Quantum, baseado no framework Qiskit, apresenta 
 integração completa entre simulação local, execução em hardware quântico 
-real e ferramentas de química quântica variacional.
+real e ferramentas de química quântica variacional. Pretende-se posteriomente comparar esse framework com a plataforma nacional composta de Ket e QuBox.
+
 Dessa forma, optou-se pela adoção prioritária do Qiskit como ambiente 
 unificado de desenvolvimento, permitindo a execução de todas as etapas 
 necessárias ao projeto sem perda metodológica ou experimental. Essa escolha 
@@ -62,14 +63,14 @@ As simulações foram executadas exclusivamente em simuladores quânticos
 clássicos disponibilizados pelo Qiskit Aer, possibilitando a análise
 do comportamento ideal do algoritmo na ausência de ruídos experimentais.
 Essa escolha permitiu isolar aspectos conceituais e metodológicos do
-algoritmo, priorizando a compreensão do seu funcionamento interno.
+algoritmo, priorizando a compreensão do seu funcionamento interno. Pretende-se realizar testes em hardware quântico real nas fases posteriores do projeto.
 
 \subsection{Formulação do problema molecular}
 
 Foram selecionadas como sistemas modelo as moléculas de hidrogênio (H$_2$) e 
 hidreto de lítio (LiH), amplamente utilizadas na literatura como benchmarks 
 em simulações quânticas devido à sua simplicidade estrutural e relevância na 
-validação de algoritmos variacionais.
+validação de algoritmos variacionais. A metodologia utilizada segue o tutorial do curso de VQE da \textcite{ibm_vqe_course}.
 
 \subsubsection{Definição geométrica e base atômica}
 
@@ -114,15 +115,13 @@ estabilidade do processo de otimização.
 \subsubsection{Loop híbrido quântico-clássico}
 
 O algoritmo VQE foi implementado utilizando a arquitetura híbrida padrão:
-
 \begin{itemize}
 \item preparação do estado variacional parametrizado;
 \item estimativa do valor esperado da energia por meio de simulação ideal de 
 estado vetorial;
 \item atualização clássica dos parâmetros variacionais;
-\item repetição do processo até o critério de parada.
+\item repetição do processo até o critério de parada, após 200 iterações.
 \end{itemize}
-
 A estimativa do valor esperado foi realizada utilizando o 
 \textit{StatevectorEstimator}, garantindo cálculo determinístico da energia 
 sem ruído estatístico.

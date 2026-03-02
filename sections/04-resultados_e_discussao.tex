@@ -11,32 +11,34 @@ validação clássica.
 
 A Tabela~\ref{tab:energy_comparison} apresenta uma síntese comparativa
 entre as energias obtidas via VQE e os valores de referência calculados
-por diagonalização exata (FCI).
-
+por diagonalização exata (FCI), obtidas via implementação em Qiskit, onde $1\,E_h =1\, \text{Hartree}$ é uma unidade de energia igual ao valor absoluto da energia potencial elétrica do átomo de hidrogênio em seu estado fundamental.
 \begin{table}[H]
+\label{tab:energy_comparison}
 \centering
 \caption{Comparação entre energias obtidas via VQE e FCI. Fonte: elaboração própria (2026).}
-\label{tab:energy_comparison}
+\vspace{10pt}
 \begin{tabular}{lccc}
 \hline
-Molécula & $E_{\text{FCI}}$ (Ha) & $E_{\text{VQE}}$ (Ha) & Erro Absoluto (Ha) \\
+Molécula & $E_{\text{FCI}}$ ($E_h$) & $E_{\text{VQE}}$ ($E_h$) & Erro Absoluto ($E_h$) \\
 \hline
-H$_2$  & -1.8573 & -1.8369 & $6.03 \times 10^{-2}$ \\
-LiH    & -8.8745 & -7.9576 & $9.17 \times 10^{-1}$ \\
+H$_2$  & $-1,8573$ & $-1,8369$ & $6,03 \times 10^{-2}$ \\
+LiH    & $-8,8745$ & $-7,9576$ & $9,17 \times 10^{-1}$ \\
 \hline
 \end{tabular}
 \end{table}
+
+
 
 \subsection{Molécula de Hidrogênio (\texorpdfstring{H$_2$}{H2})}
 
 Para a molécula de hidrogênio, o algoritmo VQE apresentou
 comportamento de convergência consistente ao longo das iterações.
 A energia variacional obtida foi
-$E_{\text{VQE}} = -1.1373$ Hartree, enquanto o valor de referência
+$E_{\text{VQE}} = -1,8369$ $E_h$, enquanto o valor de referência
 calculado via diagonalização exata (FCI) foi
-$E_{\text{FCI}} = -1.1379$ Hartree, resultando em erro absoluto
-da ordem de $6.0 \times 10^{-4}$ Hartree, correspondente a um erro
-relativo inferior a 0,1\%.
+$E_{\text{FCI}} = -1,8573$ $E_h$, resultando em erro absoluto
+da ordem de $6,03 \times 10^{-2}$ $E_h$, correspondente a um erro
+relativo da ordem de $3\,\%$.
 
 A Figura~\ref{fig:h2_convergence} mostra a evolução da energia ao
 longo do processo de otimização. Observa-se que, após pequenas
@@ -47,7 +49,7 @@ evidente a estabilização em torno do mínimo.
 
 \begin{figure}[H] 
 \centering 
-\includegraphics[width=0.4\textwidth]{img/h2_convergence.png} 
+\includegraphics[width=0.6\textwidth]{img/h2_convergence.png} 
 \caption{Convergência da energia variacional ao 
 longo das iterações do VQE para a molécula de hidrogênio. Fonte: elaboração 
 própria (2026).} 
@@ -72,10 +74,10 @@ eletrônica sobre a dinâmica de otimização variacional.
 
 Para o sistema LiH, observou-se comportamento significativamente distinto
 em comparação ao H$_2$. A energia variacional obtida foi 
-$E_{\text{VQE}} = -7.9576$ Hartree, enquanto o valor de referência
+$E_{\text{VQE}} = -7,9576$ $E_h$, enquanto o valor de referência
 calculado por diagonalização exata foi 
-$E_{\text{FCI}} = -8.8745$ Hartree, resultando em erro absoluto
-da ordem de $9.17 \times 10^{-1}$ Hartree, aproximadamente 10,3\%
+$E_{\text{FCI}} = -8,8745$ $E_h$, resultando em erro absoluto
+da ordem de $9,17 \times 10^{-1}$ $E_h$, aproximadamente 10,3\%
 em termos relativos.
 
 A Figura~\ref{fig:lih_convergence} evidencia um processo de otimização
@@ -88,7 +90,7 @@ flutuações de magnitude considerável.
 
 \begin{figure}[H] 
 \centering 
-\includegraphics[width=0.4\textwidth]{img/lih_convergence.png} 
+\includegraphics[width=0.6\textwidth]{img/lih_convergence.png} 
 \caption{Convergência da energia variacional ao 
 longo das iterações do VQE para a molécula de hidreto de lítio. Fonte: 
 elaboração própria (2026).} 
@@ -104,7 +106,7 @@ espaço de busca, tornando o processo de otimização mais sensível
 
 Além disso, a maior correlação eletrônica presente no LiH exige
 maior expressividade do circuito variacional. O \textit{ansatz}
-hardware-efficient adotado, embora adequado para o regime NISQ
+\textit{hardware-efficient} adotado, embora adequado para o regime NISQ
 por sua baixa profundidade, pode não possuir capacidade suficiente
 para capturar integralmente a estrutura eletrônica do sistema,
 limitando a aproximação ao valor FCI.
