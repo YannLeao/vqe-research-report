@@ -1,16 +1,50 @@
 # ===== LaTeX auxiliary files =====
 *.aux
-*.log
-*.out
-*.toc
-*.synctex.gz
-*.fls
+*.bcf
+*.brf
+*.dvi
 *.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.run.xml
+*.snm
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.toc
+*.vrb
+*.xdv
+*.xwm
 *.bbl
 *.blg
-*.nav
-*.snm
-*.vrb
+*.loa
+*.lol
+*.loe
+*.glg
+*.glo
+*.gls
+*.ist
+*.acn
+*.acr
+*.alg
+*.glsdefs
+*.listing
+*.pyg
+_minted-*/
+
+# Default latexmk output when compiling main.tex.
+**/main.pdf
+
+# ===== Build directories =====
+build/
+dist/
 
 # ===== IDE files =====
 .idea/
