@@ -9,11 +9,11 @@ configurações por geometria. Energias FCI/CASCI definem os rótulos de erro
 absoluto, enquanto apenas descritores disponíveis antes do VQE são usados como
 entrada. Regressão Dummy, Ridge, Random Forest e uma rede MLP são avaliadas por
 validação cruzada aninhada e agrupada por geometria. Random Forest apresentou o
-menor erro absoluto médio, enquanto a MLP produziu as melhores recomendações
-top-$k$. Seu top-3 incluiu a melhor configuração disponível em todas as
-geometrias e alcançou a cobertura máxima possível de precisão química, 85,2\%,
-evitando 83,3\% das avaliações do grid exaustivo. Um teste deixando uma molécula
-inteira fora do treino mostrou generalização preditiva substancialmente mais
-fraca. Os resultados indicam a recomendação de configurações como aplicação
-promissora de aprendizado de máquina ao VQE, mas evidenciam as limitações do
-dataset pequeno e sem ruído.
+menor erro absoluto médio. A MLP obteve a maior cobertura top-3 observada,
+85,2\%, contra 77,8\% dos baselines global e por molécula calculados somente no
+treino, executando na inferência apenas três dos 18 candidatos. Entretanto, o
+intervalo bootstrap pareado da diferença incluiu zero. Sem o identificador da
+molécula, a cobertura top-3 da MLP caiu para 77,8\%; deixando uma molécula
+inteira fora do treino, a generalização também foi fraca. Os resultados indicam
+uma aplicação promissora, porém dependente da família de instâncias, e
+evidenciam as limitações do dataset pequeno e sem ruído.

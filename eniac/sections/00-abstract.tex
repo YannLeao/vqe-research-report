@@ -1,6 +1,3 @@
-\noindent\textbf{Machine Learning-Based Configuration Recommendation for the
-Variational Quantum Eigensolver: A Pilot Study.}
-
 The Variational Quantum Eigensolver (VQE) depends on algorithmic choices such
 as the parameterized circuit, classical optimizer, and circuit depth. Exhaustive
 evaluation of these configurations becomes costly as molecular geometries and
@@ -12,11 +9,12 @@ energies define the absolute-error labels, while only descriptors available
 before VQE execution are used as model inputs. Dummy regression, Ridge, Random
 Forest, and a multilayer perceptron (MLP) are evaluated through nested
 cross-validation grouped by molecular geometry. Random Forest achieved the
-lowest mean absolute error, whereas the MLP provided the best top-$k$
-recommendations. Its top-3 set contained the best available configuration for
-all geometries and reached the maximum attainable chemical-accuracy coverage
-of 85.2\%, while avoiding 83.3\% of the exhaustive grid evaluations. A
+lowest mean absolute error. The MLP attained the highest observed top-3
+coverage, 85.2\%, versus 77.8\% for training-only global and per-molecule
+baselines, while requiring only three of 18 candidate evaluations at inference.
+However, the paired bootstrap interval for this difference included zero.
+Removing the molecule identifier reduced MLP top-3 coverage to 77.8\%, and a
 leave-one-molecule-out experiment showed substantially weaker predictive
-generalization. The results support configuration recommendation as a promising
-use of machine learning for VQE, while also exposing the limitations of the
-small, noiseless dataset.
+generalization. The results support configuration recommendation as a
+promising but instance-family-dependent use of machine learning for VQE and
+expose the limitations of the small, noiseless dataset.

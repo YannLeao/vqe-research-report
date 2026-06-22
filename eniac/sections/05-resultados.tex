@@ -2,43 +2,40 @@
 
 \subsection{Caracterização do grid search}
 
-\begin{figure*}[ht]
+\begin{figure}[!ht]
   \centering
-  \includegraphics[width=\textwidth]{grid_search_resumo_sto-3g.png}
+  \includegraphics[width=0.92\textwidth]{grid_search_summary_article.png}
   \caption{Erro médio das configurações no grid STO-3G. A linha pontilhada
-  marca o limiar de 1 kcal/mol. Bordô indica que todas as geometrias atingiram
-  precisão química, azul indica sucesso parcial e cinza indica ausência de
-  sucesso. Combinações com diferentes \textit{reps} foram agregadas para
-  facilitar a leitura.}
+  marca 1 kcal/mol. Bordô indica sucesso em todas as geometrias, azul em parte
+  delas e cinza em nenhuma. Diferentes \textit{reps} foram agregadas.}
   \label{fig:grid-summary}
-\end{figure*}
+\end{figure}
 
-A Figura~\ref{fig:grid-summary} evidencia que a qualidade das configurações
-depende do sistema molecular. Em H$_2$, diferentes combinações fisicamente
-inspiradas atingem erros muito inferiores ao limiar em todas as geometrias. Em
-LiH, somente parte das combinações alcança precisão química, e em BeH$_2$ até
-as melhores configurações possuem erro médio acima de 1 kcal/mol, embora
-algumas distâncias sejam resolvidas. Esse deslocamento do ranking entre
-moléculas motiva aprender uma ordenação condicionada à instância, em vez de
-adotar somente uma configuração fixa.
+A Figura~\ref{fig:grid-summary} mostra que o ranking depende do sistema. Em
+H$_2$, combinações fisicamente inspiradas atingem erros muito inferiores ao
+limiar em todas as geometrias. Em LiH, somente parte das combinações alcança
+precisão química. Em BeH$_2$, mesmo as melhores possuem erro médio acima de
+1 kcal/mol, embora resolvam algumas distâncias. Essa variação motiva um ranking
+condicionado à instância, mas também antecipa a dificuldade de generalização.
 
 \subsection{Predição do erro}
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
   \centering
   \includegraphics[width=\textwidth]{predicted_vs_real_models.png}
   \caption{Erro previsto e real no protocolo agrupado por geometria. A linha
-  tracejada representa previsão ideal. Os eixos estão em escala logarítmica.}
+  tracejada representa predição ideal; ambos os eixos são logarítmicos.}
   \label{fig:predictions}
 \end{figure}
 
-\begin{table}[ht]
+\begin{table}[!ht]
 \centering
 \caption{Média dos cinco folds no protocolo agrupado por geometria.}
 \label{tab:regression}
 \begin{tabular}{lrrrr}
 \toprule
-Modelo & MAE & RMSE & MAE log & $R^2$ log \\
+Modelo & MAE & RMSE & MAE alvo log & $R^2$ alvo log \\
+       & \multicolumn{2}{c}{(kcal/mol)} & & \\
 \midrule
 Dummy         & 37,980 & 74,302 & 1,571 & -0,015 \\
 Ridge         & 24,335 & 53,039 & 0,809 &  0,677 \\
@@ -48,85 +45,95 @@ MLP           & 18,746 & 37,688 & 0,596 & \textbf{0,774} \\
 \end{tabular}
 \end{table}
 
-Random Forest apresentou os menores MAE e RMSE, enquanto a MLP obteve o maior
-$R^2$ logarítmico. A Figura~\ref{fig:predictions} mostra que ambos capturam a
-tendência entre configurações de baixo e alto erro, mas comprimem extremos. A
-transformação logarítmica impede que poucos erros de centenas de kcal/mol
-dominem o ajuste; consequentemente, diferenças muito pequenas próximas de zero
-não são reproduzidas com precisão absoluta.
+A Tabela~\ref{tab:regression} mostra que Random Forest obteve os menores MAE e
+RMSE, enquanto a MLP apresentou o maior $R^2$ log. A
+Figura~\ref{fig:predictions} indica que ambos capturam a separação entre erros
+baixos e altos, mas comprimem extremos. A transformação logarítmica evita que
+poucos erros de centenas de kcal/mol dominem o ajuste. O piso visual em
+$10^{-6}$ decorre apenas do gráfico: predições negativas no alvo log foram
+truncadas em zero e, para exibição em escala logarítmica, zero foi representado
+por $10^{-6}$ kcal/mol.
 
 \subsection{Qualidade das recomendações}
 
-\begin{minipage}{\textwidth}
-Somente 23 das 27 geometrias possuem ao menos uma configuração dentro da
-precisão química; portanto, 85,2\% é o teto de cobertura de qualquer
-recomendador restrito a este grid.
-\end{minipage}
+Somente 23 das 27 geometrias possuem ao menos um candidato dentro da precisão
+química; 85,2\% é, portanto, o teto de cobertura deste grid.
 
-\begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.86\textwidth]{topk_success_vs_reduction.png}
-  \caption{Compromisso entre redução do grid e cobertura de precisão química.
-  As faixas representam intervalos bootstrap de 95\%.}
-  \label{fig:topk}
-\end{figure}
-
-\begin{table}[ht]
+\begin{table}[!ht]
 \centering
-\caption{Resultados top-$k$ no protocolo agrupado por geometria. Erro e regret
-estão em kcal/mol.}
+\caption{Resultados top-$k$ agrupados por geometria. Erro e regret em
+kcal/mol; a última coluna conta candidatos evitados na inferência.}
 \label{tab:topk}
 \begin{tabular}{llrrrr}
 \toprule
-Modelo & $k$ & Sucesso & Erro & Regret & Grid evitado \\
+Modelo & $k$ & Cobertura & Erro & Regret & Candidatos evitados \\
 \midrule
-Aleatório     & 1 & 26,9\% & 40,099 & 39,316 & 94,4\% \\
-Melhor global & 1 & 77,8\% &  1,410 &  0,627 & 94,4\% \\
-MLP           & 1 & 77,8\% &  1,433 &  0,650 & 94,4\% \\
+Aleatório       & 1 & 26,9\% & 40,099 & 39,316 & 94,4\% \\
+Melhor global   & 1 & 77,8\% &  1,410 &  0,627 & 94,4\% \\
+Melhor/molécula & 1 & 74,1\% &  1,593 &  0,810 & 94,4\% \\
+MLP             & 1 & 77,8\% &  1,433 &  0,650 & 94,4\% \\
 \midrule
-Aleatório     & 3 & 55,4\% &  7,074 &  6,291 & 83,3\% \\
-Melhor global & 3 & 77,8\% &  1,008 &  0,225 & 83,3\% \\
-Random Forest & 3 & 77,8\% &  0,961 &  0,178 & 83,3\% \\
-MLP           & 3 & \textbf{85,2\%} & \textbf{0,783} & \textbf{0,000} & 83,3\% \\
-Oráculo       & 3 & 85,2\% & 0,783 & 0,000 & 83,3\% \\
+Aleatório       & 3 & 55,4\% &  7,074 &  6,291 & 83,3\% \\
+Melhor global   & 3 & 77,8\% &  1,008 &  0,225 & 83,3\% \\
+Melhor/molécula & 3 & 77,8\% &  1,008 &  0,225 & 83,3\% \\
+Random Forest   & 3 & 77,8\% &  0,961 &  0,178 & 83,3\% \\
+MLP             & 3 & \textbf{85,2\%} & \textbf{0,783} & \textbf{0,000} & 83,3\% \\
+Oráculo         & 3 & 85,2\% & 0,783 & 0,000 & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-No top-1, MLP, Ridge e melhor configuração global atingiram 77,8\%, sem
-vantagem do aprendizado sobre o baseline global. Esse resultado indica que uma
-configuração fisicamente inspirada e robusta já resolve grande parte das
-geometrias. No top-3, contudo, a MLP alcançou o teto do oráculo, com regret médio
-zero e intervalo de cobertura de 70,4\% a 96,3\%. Isso significa que a melhor
-configuração observada esteve entre as três primeiras recomendações em todas as
-geometrias. O grid necessário cai de 18 para três execuções, uma redução de
-83,3\%. A seleção aleatória top-3 atingiu apenas 55,4\%.
+A Tabela~\ref{tab:topk} mostra que, no top-1, a MLP não supera o melhor
+baseline global. No top-3, a maior cobertura observada foi da MLP: 85,2\%
+contra 77,8\% dos baselines global e por molécula, diferença de apenas duas
+geometrias. O bootstrap pareado da diferença foi 7,4 pontos percentuais, com
+IC$_{95\%}$ de 0,0 a 18,5 por geometria e de 0,0 a 22,2 ao reamostrar moléculas
+como clusters. Logo, os dados não demonstram vantagem estatística da MLP.
 
-O oráculo é apresentado somente como limite superior: ele ordena as
-configurações usando os erros conhecidos após executar o grid completo. Assim,
-a porcentagem associada a seu top-$k$ não representa uma economia operacional;
-apenas os recomendadores e baselines treinados podem reduzir avaliações na
-prática.
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.86\textwidth]{topk_success_vs_reduction.png}
+  \caption{Cobertura top-$k$ versus fração de candidatos não executados na
+  inferência. Os pontos da MLP identificam $k=1,3,5$; faixas representam
+  intervalos bootstrap de 95\%.}
+  \label{fig:topk}
+\end{figure}
 
-Por molécula, o top-3 da MLP atingiu o máximo disponível: 9/9 geometrias em
-H$_2$, 9/9 em LiH e 5/9 em BeH$_2$. As quatro falhas de BeH$_2$ não decorrem do
-ranking, pois nenhuma das 18 configurações dessas geometrias alcançou precisão
-química.
+A Figura~\ref{fig:topk} apresenta o compromisso entre cobertura e quantidade de
+candidatos. Para $k=3$, o recomendador executaria três em vez de 18 candidatos,
+redução nominal de 83,3\%. Isso não equivale a 83,3\% de tempo ou custo
+quântico: ansätze e otimizadores possuem profundidades e números de chamadas
+diferentes. Além disso, produzir o modelo exigiu previamente as 486 execuções.
+O benefício depende, portanto, de amortizar o treinamento em novas geometrias
+relacionadas. O oráculo é apenas limite superior e requer conhecer o grid todo.
 
-\clearpage
-\subsection{Generalização e ameaças à validade}
+\subsection{Ablação e generalização}
 
-Ao deixar uma molécula inteira fora do treino, o desempenho preditivo caiu. O
-$R^2$ logarítmico médio foi 0,302 para Random Forest, 0,146 para Ridge e -0,104
-para MLP. Embora MLP e melhor configuração global ainda tenham obtido 77,8\%
-no top-1, esse resultado reflete em parte a estabilidade do ranking de algumas
-configurações, e não evidência de uma representação molecular geral.
+\begin{table}[!ht]
+\centering
+\caption{Desempenho da MLP nos protocolos de generalização.}
+\label{tab:ablation}
+\begin{tabular}{lrrr}
+\toprule
+Protocolo & MAE alvo log & $R^2$ alvo log & Cobertura top-3 \\
+\midrule
+Geometrias, com molécula & 0,596 &  0,774 & 85,2\% \\
+Geometrias, sem molécula & 0,629 &  0,754 & 77,8\% \\
+Molécula não vista       & 1,274 & -0,104 & 77,8\% \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-O estudo usa somente três moléculas, STO-3G, Jordan--Wigner, um seed, um
-orçamento de 100 iterações e simulação ideal. Linhas de uma mesma molécula não
-são independentes no sentido químico, ainda que o agrupamento impeça vazamento
-da mesma geometria. Os intervalos são largos devido às 27 unidades de avaliação.
-Além disso, o recomendador escolhe apenas entre candidatos já presentes no grid;
-ele não cria novos ansätze nem substitui a otimização dos parâmetros. Portanto,
-os resultados demonstram viabilidade dentro do domínio estudado, não
-generalização para hardware, bases maiores ou moléculas arbitrárias.
+Como mostra a Tabela~\ref{tab:ablation}, remover o identificador molecular
+reduziu a cobertura top-3 da MLP ao mesmo valor do baseline global. Ao deixar
+uma molécula inteira fora do treino, o $R^2$ log tornou-se negativo. Assim,
+parte relevante do sinal aprendido é um ranking típico das famílias moleculares
+observadas, e não uma representação química geral.
+
+O estudo usa somente três moléculas, STO-3G, uma semente, 100 iterações e
+simulação ideal. O bootstrap por geometria subestima potencialmente a
+dependência intramolecular; o intervalo por clusters usa apenas três unidades e
+também é impreciso. O recomendador escolhe apenas candidatos presentes no grid
+e não cria ansätze nem substitui a otimização dos parâmetros. Os resultados
+demonstram viabilidade dentro do domínio estudado, não generalização para
+hardware, bases maiores ou moléculas arbitrárias.

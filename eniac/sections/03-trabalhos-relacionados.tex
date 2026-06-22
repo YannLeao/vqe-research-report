@@ -23,6 +23,13 @@ tem espaço de ações e objetivo diferentes do presente estudo: ela sintetiza u
 circuito, enquanto aqui se ordena um conjunto discreto e previamente definido
 de configurações \cite{ostaszewski2021rl}.
 
+A escolha do otimizador também não pode ser reduzida ao número nominal de
+iterações. Um benchmark de 30 otimizadores em 372 instâncias VQE mostrou que
+rankings por energia final e por chamadas da função podem divergir, e que
+hiperparâmetros internos alteram substancialmente o resultado
+\cite{jones2024optimisers}. Isso motiva separar, no presente estudo, redução do
+número de configurações candidatas de uma afirmação sobre custo computacional.
+
 Nosso meta-recomendador tampouco prevê a energia FCI, os ângulos do circuito ou
 a próxima atualização do otimizador. Ele seleciona, antes da execução, a
 combinação de ansatz, otimizador e profundidade com menor erro esperado. Essa

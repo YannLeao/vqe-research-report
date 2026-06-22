@@ -2,26 +2,37 @@
 
 Este trabalho apresentou um estudo piloto de recomendação supervisionada de
 configurações VQE. O problema foi formulado como regressão do erro energético e
-ranking de 18 candidatos por geometria. A validação agrupada evitou que uma
-mesma geometria aparecesse em treino e teste e permitiu medir diretamente a
-economia em relação ao grid exaustivo.
+ranking de 18 candidatos por geometria. A validação agrupada impediu que uma
+mesma geometria aparecesse simultaneamente em treino e teste, enquanto os
+baselines foram estimados exclusivamente com os folds de treinamento.
 
-Random Forest forneceu o menor erro absoluto de regressão, enquanto a MLP
-produziu o melhor conjunto top-3. Com apenas três recomendações, a MLP incluiu a
-melhor configuração disponível em todas as geometrias, alcançou a cobertura
-máxima de precisão química do dataset e evitou 83,3\% das avaliações. Entretanto,
-o baseline global foi competitivo no top-1 e a generalização para uma molécula
-inteiramente nova foi fraca. Assim, a principal evidência não é que uma rede
-substitui a otimização VQE, mas que dados de caracterização podem reduzir o
-número de configurações que precisam ser executadas em geometrias relacionadas.
+O Random Forest obteve o menor erro absoluto de regressão. Na métrica principal
+de recomendação, a MLP apresentou a maior cobertura top-3 observada: 85,2\%,
+contra 77,8\% dos baselines global e por molécula. Essa diferença corresponde a
+apenas duas das 27 geometrias e seu intervalo bootstrap pareado incluiu zero;
+portanto, os dados atuais não demonstram superioridade estatística da MLP. A
+ablação sem o identificador molecular reduziu sua cobertura top-3 para 77,8\%,
+e o protocolo de exclusão de uma molécula apresentou generalização preditiva
+fraca. Esses resultados indicam que parte relevante do sinal aprendido ainda é
+específica das moléculas observadas.
 
-Trabalhos futuros devem ampliar moléculas, bases, seeds e modelos de ruído;
-incorporar descritores químicos independentes do nome da molécula; avaliar custo
-de circuito e tempo em um objetivo multiobjetivo; e testar descritores
-espectrais da paisagem, incluindo informação de Fourier, como sinais de
-dificuldade de otimização ou para seleção de pontos iniciais.
+Selecionar três dos 18 candidatos evita avaliar 83,3\% do grid durante a
+aplicação do recomendador. Esse percentual não representa redução equivalente
+de tempo ou custo computacional: o treinamento utilizou as 486 execuções
+existentes e configurações VQE possuem custos heterogêneos. Assim, a evidência
+central deste estudo não é que uma rede substitui a otimização VQE, mas que a
+formulação como recomendação top-$k$ oferece um protocolo mensurável para
+investigar a reutilização de dados de caracterização em geometrias relacionadas.
 
-Os artefatos completos serão vinculados publicamente na versão final, após a
-etapa de revisão anônima. Com isso, a ampliação do dataset poderá ser conduzida
-de forma incremental e comparável, preservando tanto configurações bem-sucedidas
-quanto falhas experimentais relevantes para o aprendizado do recomendador.
+Trabalhos futuros devem ampliar moléculas, bases, sementes e modelos de ruído;
+incorporar descritores físico-químicos independentes do nome da molécula;
+considerar custo de circuito e tempo de execução em um objetivo multiobjetivo;
+e avaliar se o custo inicial de construção do dataset é amortizado em novas
+geometrias. Descritores espectrais da paisagem, incluindo informação de Fourier,
+também poderão ser investigados como sinais de dificuldade de otimização ou
+para seleção de pontos iniciais.
+
+Os artefatos completos serão vinculados publicamente apenas na versão final,
+após a revisão anônima. A ampliação do dataset poderá, então, ser conduzida de
+forma incremental e comparável, preservando configurações bem-sucedidas e
+falhas experimentais relevantes para o aprendizado do recomendador.
