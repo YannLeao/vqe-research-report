@@ -1,20 +1,10 @@
-The Variational Quantum Eigensolver (VQE) depends on algorithmic choices such
-as the parameterized circuit, classical optimizer, and circuit depth. Exhaustive
-evaluation of these configurations becomes costly as molecular geometries and
-candidate configurations increase. This paper investigates supervised learning
-as a meta-recommender that ranks VQE configurations before their execution. We
-analyze 486 noiseless statevector simulations for H$_2$, LiH, and BeH$_2$,
-covering 27 molecular geometries and 18 configurations per geometry. FCI/CASCI
-energies define the absolute-error labels, while only descriptors available
-before VQE execution are used as model inputs. Dummy regression, Ridge, Random
-Forest, and a multilayer perceptron (MLP) are evaluated through nested
-cross-validation grouped by molecular geometry. Random Forest achieved the
-lowest mean absolute error. The MLP attained the highest observed top-3
-coverage, 85.2\%, versus 77.8\% for training-only global and per-molecule
-baselines, while requiring only three of 18 candidate evaluations at inference.
-However, the paired bootstrap interval for this difference included zero.
-Removing the molecule identifier reduced MLP top-3 coverage to 77.8\%, and a
-leave-one-molecule-out experiment showed substantially weaker predictive
-generalization. The results support configuration recommendation as a
-promising but instance-family-dependent use of machine learning for VQE and
-expose the limitations of the small, noiseless dataset.
+The Variational Quantum Eigensolver (VQE) depends on choices of parameterized
+circuit, optimizer, and depth. We investigate supervised learning as a
+meta-recommender that ranks configurations before execution. The evaluation
+uses 486 noiseless simulations covering three molecules, 27 geometries, and 18
+configurations per geometry, with nested cross-validation grouped by geometry.
+An MLP achieved the highest observed top-3 coverage, 85.2\%, versus 77.8\% for
+training-only global and per-molecule baselines, while evaluating three of 18
+candidates at inference. However, the paired bootstrap interval included zero,
+and leave-one-molecule-out evaluation showed weak generalization. Thus, the
+approach is promising within related molecular families but remains preliminary.
