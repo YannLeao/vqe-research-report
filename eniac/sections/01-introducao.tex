@@ -1,4 +1,35 @@
-\section{Introducao}
+\section{Introdução}
 
-Texto da introducao com uma citacao temporaria para testar a bibliografia
-\cite{preskill2018nisq}.
+A determinação da energia do estado fundamental é uma tarefa central em
+estrutura eletrônica. Métodos exatos, como \textit{Full Configuration
+Interaction} (FCI), têm custo que cresce combinatoriamente com o tamanho do
+sistema, o que motiva o estudo de algoritmos quânticos para química. No cenário
+de dispositivos quânticos ruidosos e de escala intermediária
+\cite{preskill2018nisq}, o \textit{Variational Quantum Eigensolver} (VQE)
+\cite{peruzzo2014variational} tornou-se uma das principais abordagens híbridas
+para estimar energias moleculares.
+
+O desempenho do VQE, contudo, não é determinado apenas pela Hamiltoniana. É
+necessário escolher uma família de circuitos parametrizados (\textit{ansatz}),
+um otimizador clássico, uma profundidade e um ponto inicial. Essas decisões
+alteram expressividade, custo de execução e dificuldade de otimização
+\cite{cerezo2021variational}. Uma estratégia comum consiste em executar um grid
+search e selecionar a configuração com menor erro. Essa abordagem é útil para
+caracterização experimental, mas exige executar todos os candidatos em cada
+geometria molecular.
+
+Este trabalho formula a escolha de configurações como um problema de
+recomendação supervisionada. Um modelo recebe descritores conhecidos antes da
+execução, como distância internuclear, ansatz, otimizador, número de repetições,
+qubits e termos da Hamiltoniana, e estima o erro energético esperado. As
+configurações são então ordenadas, permitindo executar somente as $k$ mais
+promissoras. O modelo não substitui o otimizador clássico: ele atua em um nível
+anterior, selecionando quais combinações merecem ser avaliadas.
+
+As contribuições são: (i) a consolidação de 486 execuções VQE rotuladas por
+referências FCI/CASCI; (ii) a comparação, sem vazamento entre geometrias, de
+baselines lineares, árvores e uma rede neural; (iii) uma avaliação top-$k$ que
+quantifica simultaneamente cobertura de precisão química, regret e economia de
+avaliações; e (iv) uma análise exploratória de generalização para moléculas não
+vistas. Por se tratar de três moléculas pequenas, uma base mínima e simulação
+sem ruído, os resultados são apresentados como estudo piloto.

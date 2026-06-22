@@ -1,0 +1,80 @@
+\section{Metodologia}
+
+\subsection{Pipeline e dataset}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{pipeline.png}
+  \caption{Pipeline de construção do dataset e recomendação top-$k$. A energia
+  FCI/CASCI é usada somente para produzir o rótulo de erro.}
+  \label{fig:pipeline}
+\end{figure}
+
+Foram consideradas H$_2$, LiH e BeH$_2$ na base STO-3G, com mapeamento
+Jordan--Wigner e estimador statevector sem ruído. Para cada molécula, nove
+distâncias foram avaliadas. Em cada geometria, o grid contém 18 candidatos,
+formados por quatro ansätze, três otimizadores e uma ou duas repetições para os
+circuitos heurísticos. UCCSD e PUCCSD usam uma repetição. Todas as execuções
+usaram 100 iterações máximas e semente 137.
+
+\begin{table}[ht]
+\centering
+\caption{Caracterização do dataset. A última coluna indica execuções que
+atingiram precisão química.}
+\label{tab:dataset}
+\begin{tabular}{lrrrr}
+\toprule
+Molécula & Qubits & Geometrias & Execuções & Precisão química \\
+\midrule
+H$_2$   & 4 & 9 & 162 & 71 (43,8\%) \\
+LiH     & 6 & 9 & 162 & 50 (30,9\%) \\
+BeH$_2$ & 8 & 9 & 162 &  9 ( 5,6\%) \\
+\midrule
+Total   & -- & 27 & 486 & 130 (26,7\%) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+O alvo de regressão é
+$y=\log(1+\lvert E_{\mathrm{VQE}}-E_{\mathrm{ref}}\rvert_{\mathrm{kcal/mol}})$,
+pois o erro observado cobre várias ordens de grandeza. As variáveis categóricas
+são molécula, ansatz e otimizador; as numéricas são distância, repetições,
+número de qubits e termos da Hamiltoniana. Energias, erros, tempos e avaliações
+do otimizador são excluídos das entradas para evitar vazamento.
+
+\subsection{Modelos e validação}
+
+Foram comparados DummyRegressor, Ridge, RandomForestRegressor e MLPRegressor,
+implementados com scikit-learn \cite{pedregosa2011scikit}. Categorias recebem
+one-hot encoding e variáveis numéricas são padronizadas. A MLP possui duas
+camadas ocultas; sua largura e regularização $L_2$ são selecionadas entre
+$(32,16)$ e $(64,32)$ e $\alpha\in\{10^{-3},10^{-2}\}$. Para Ridge,
+$\alpha\in\{0{,}1,1,10\}$; para Random Forest, são testadas profundidade livre
+ou 8 e folhas mínimas de 1 ou 2, com 300 árvores.
+
+A avaliação principal usa cinco folds externos agrupados por
+molécula--distância. Assim, as 18 configurações de uma geometria permanecem
+inteiramente no treino ou teste. Cada fold externo contém uma busca de
+hiperparâmetros com três folds internos, também agrupados. Um segundo protocolo
+deixa uma molécula inteira fora do treino, remove seu identificador categórico
+e conserva apenas os descritores físicos e algorítmicos.
+
+Além de MAE, RMSE e $R^2$ no alvo logarítmico, avalia-se a recomendação top-1,
+top-3 e top-5. Para cada geometria, mede-se se o conjunto contém uma configuração
+com precisão química, o menor erro contido no conjunto e o regret em relação ao
+melhor candidato do grid. Os baselines são seleção aleatória com mil repetições,
+a configuração de menor erro médio no treino e o oráculo do grid completo.
+Intervalos de 95\% são obtidos por mil reamostragens bootstrap das geometrias.
+
+\subsection{Reprodutibilidade e artefatos}
+
+O experimento é executado com semente fixa e produz, em uma única rotina, o
+dataset consolidado, as predições fora de amostra, os hiperparâmetros escolhidos
+em cada fold, as métricas agregadas e as figuras. Também são preservados os
+caches FCI/CASCI e VQE que originam as 486 linhas, permitindo rastrear cada
+rótulo até a execução correspondente.
+
+O código-fonte, os dados experimentais e as instruções de reprodução estão em
+um repositório público. Seu endereço foi omitido nesta versão para preservar a
+revisão duplo-anônima e será incluído na versão final. A disponibilização inclui
+o pipeline completo, e não somente as tabelas processadas usadas neste artigo.

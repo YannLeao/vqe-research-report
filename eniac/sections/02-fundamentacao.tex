@@ -1,3 +1,77 @@
-\section{Fundamentacao Teorica}
+\section{Fundamentação}
 
-Texto da fundamentacao teorica.
+\subsection{Estrutura eletrônica em computadores quânticos}
+
+Na aproximação de Born--Oppenheimer, os núcleos são tratados como fixos para
+cada geometria e resolve-se o problema eletrônico. Em segunda quantização, a
+Hamiltoniana é escrita em termos de operadores fermiônicos de criação e
+aniquilação. Uma transformação como Jordan--Wigner os converte em uma soma de
+produtos de Pauli,
+\begin{equation}
+ H_q = \sum_j c_j P_j, \qquad
+ P_j \in \{I,X,Y,Z\}^{\otimes n},
+\end{equation}
+que pode ser medida por um computador quântico. O número de qubits depende do
+número de spin-orbitais mantidos e o número de termos $P_j$ oferece um descritor
+simples do tamanho da Hamiltoniana.
+
+As energias exatas no espaço orbital escolhido são obtidas por \textit{Full
+Configuration Interaction} (FCI). Quando se emprega um espaço ativo, CASCI
+diagonaliza a Hamiltoniana somente nos orbitais selecionados. Neste estudo,
+essas energias são referências para calcular o erro do VQE, e não entradas dos
+modelos de aprendizado. Os cálculos clássicos foram realizados com PySCF
+\cite{sun2018pyscf}.
+
+\subsection{Variational Quantum Eigensolver}
+
+O VQE explora o princípio variacional: para qualquer estado normalizado, o
+valor esperado da Hamiltoniana limita superiormente a energia do estado
+fundamental. O algoritmo prepara um estado parametrizado
+$\lvert\psi(\boldsymbol{\theta})\rangle$ e minimiza
+\begin{equation}
+ E(\boldsymbol{\theta}) =
+ \langle\psi(\boldsymbol{\theta})\rvert H
+ \lvert\psi(\boldsymbol{\theta})\rangle .
+\end{equation}
+O processador quântico estima os valores esperados dos termos de Pauli,
+enquanto um otimizador clássico atualiza $\boldsymbol{\theta}$
+\cite{mcclean2016theory}. Essa arquitetura híbrida foi demonstrada em moléculas
+pequenas com circuitos eficientes em hardware \cite{kandala2017hardware}.
+
+Ansätze fisicamente inspirados, como UCCSD e sua versão pareada PUCCSD,
+incorporam excitações da função de onda eletrônica. Em contrapartida,
+RealAmplitudes e EfficientSU2 são circuitos heurísticos construídos com camadas
+de rotações e emaranhamento. A profundidade, controlada aqui por
+\textit{repetitions} (\textit{reps}), aumenta a expressividade, mas também o
+número de parâmetros e o custo do circuito. Circuitos muito expressivos podem
+apresentar regiões de gradientes muito pequenos, conhecidas como
+\textit{barren plateaus} \cite{mcclean2018barren}.
+
+COBYLA e SLSQP realizam buscas determinísticas com aproximações locais,
+enquanto SPSA estima a direção de atualização por perturbações estocásticas.
+Logo, a configuração do VQE envolve compromissos entre estrutura física,
+profundidade e comportamento do otimizador. Não existe uma escolha
+universalmente superior para todas as moléculas e geometrias.
+
+Neste estudo, uma configuração atinge precisão química quando
+$\lvert E_{\mathrm{VQE}}-E_{\mathrm{ref}}\rvert\leq 1$ kcal/mol. Esse limiar
+transforma a qualidade energética em um critério prático de sucesso, mas o
+modelo é treinado para regressão do erro contínuo, preservando a ordenação
+entre candidatos.
+
+\subsection{Seleção supervisionada de configurações}
+
+O problema de seleção de algoritmos consiste em escolher, a partir de
+características de uma instância, o método com melhor desempenho esperado
+\cite{rice1976algorithm}. Aqui, cada instância é uma geometria molecular e cada
+candidato é uma configuração VQE. Em vez de classificar diretamente um único
+vencedor, estima-se uma função de custo para todos os candidatos e utiliza-se a
+ordenação prevista.
+
+Modelos lineares oferecem um baseline interpretável; Random Forest representa
+relações não lineares em dados tabulares \cite{breiman2001random}; e redes
+multicamadas aproximam mapeamentos não lineares por camadas sucessivas
+\cite{hornik1989multilayer}. A regressão fornece uma pontuação comparável para
+todos os candidatos. Ordená-los por erro previsto transforma o problema em
+recomendação top-$k$: executam-se poucos candidatos e conserva-se o melhor
+resultado observado entre eles.

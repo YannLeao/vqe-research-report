@@ -1,0 +1,30 @@
+\section{Trabalhos Relacionados}
+
+O aprendizado de máquina tem sido aplicado a diferentes decisões do pipeline
+variacional. Meta-VQE compartilha informação entre Hamiltonianas parametrizadas
+e aprende um conjunto de parâmetros capaz de representar perfis de energia
+\cite{cervera2021metavqe}. Essa formulação atua diretamente nos parâmetros do
+circuito e explora a continuidade entre instâncias relacionadas.
+
+Outra linha busca pontos iniciais para reduzir o custo da otimização. FLIP
+emprega meta-aprendizado para inferir inicializações de circuitos parametrizados
+e pode transferir o conhecimento para circuitos maiores que os vistos no treino
+\cite{sauvage2021flip}. Qracle representa conjuntamente a Hamiltoniana e o
+ansatz como um grafo e usa uma GNN para prever parâmetros iniciais
+\cite{zhang2025qracle}. O dataset VQEzy foi proposto para sustentar esse tipo de
+aprendizado, reunindo especificações e trajetórias de otimização em diferentes
+domínios \cite{zhang2025vqezy}. Esses trabalhos evidenciam tanto o potencial do
+aprendizado quanto a importância de dados padronizados.
+
+Há ainda abordagens que alteram a arquitetura do circuito. Um agente de
+reinforcement learning pode construir ansätze
+incrementalmente, equilibrando acurácia e profundidade no LiH. Essa estratégia
+tem espaço de ações e objetivo diferentes do presente estudo: ela sintetiza um
+circuito, enquanto aqui se ordena um conjunto discreto e previamente definido
+de configurações \cite{ostaszewski2021rl}.
+
+Nosso meta-recomendador tampouco prevê a energia FCI, os ângulos do circuito ou
+a próxima atualização do otimizador. Ele seleciona, antes da execução, a
+combinação de ansatz, otimizador e profundidade com menor erro esperado. Essa
+separação permite avaliar a contribuição por métricas de recomendação e pela
+fração do grid que deixa de ser executada.

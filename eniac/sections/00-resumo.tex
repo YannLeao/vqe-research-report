@@ -1,1 +1,19 @@
-Escreva o resumo aqui.
+O \textit{Variational Quantum Eigensolver} (VQE) depende de escolhas
+algorítmicas como circuito parametrizado, otimizador clássico e profundidade do
+circuito. Avaliar exaustivamente essas configurações torna-se custoso à medida
+que aumentam as geometrias moleculares e as alternativas candidatas. Este artigo
+investiga aprendizado supervisionado como um meta-recomendador que ordena
+configurações de VQE antes de sua execução. Foram analisadas 486 simulações
+statevector sem ruído para H$_2$, LiH e BeH$_2$, abrangendo 27 geometrias e 18
+configurações por geometria. Energias FCI/CASCI definem os rótulos de erro
+absoluto, enquanto apenas descritores disponíveis antes do VQE são usados como
+entrada. Regressão Dummy, Ridge, Random Forest e uma rede MLP são avaliadas por
+validação cruzada aninhada e agrupada por geometria. Random Forest apresentou o
+menor erro absoluto médio, enquanto a MLP produziu as melhores recomendações
+top-$k$. Seu top-3 incluiu a melhor configuração disponível em todas as
+geometrias e alcançou a cobertura máxima possível de precisão química, 85,2\%,
+evitando 83,3\% das avaliações do grid exaustivo. Um teste deixando uma molécula
+inteira fora do treino mostrou generalização preditiva substancialmente mais
+fraca. Os resultados indicam a recomendação de configurações como aplicação
+promissora de aprendizado de máquina ao VQE, mas evidenciam as limitações do
+dataset pequeno e sem ruído.
