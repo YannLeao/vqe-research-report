@@ -1,37 +1,31 @@
 \section{Trabalhos Relacionados}
 
-O aprendizado de máquina tem sido aplicado a diferentes decisões do pipeline
-variacional. Meta-VQE compartilha informação entre Hamiltonianas parametrizadas
-e aprende um conjunto de parâmetros capaz de representar perfis de energia
-\cite{cervera2021metavqe}. Essa formulação atua diretamente nos parâmetros do
-circuito e explora a continuidade entre instâncias relacionadas.
+O aprendizado de máquina tem sido aplicado a diferentes etapas dos algoritmos
+variacionais. Uma dessas aplicações é o Meta-VQE, que compartilha informação
+entre Hamiltonianas parametrizadas e aprende parâmetros capazes de representar
+perfis de energia \cite{cervera2021metavqe}. Portanto, seu objetivo é ajustar o
+próprio circuito aproveitando a semelhança entre problemas relacionados.
 
-Outra linha busca pontos iniciais para reduzir o custo da otimização. FLIP
+Em vez de ajustar todo o circuito, outra linha de pesquisa busca bons pontos
+iniciais para reduzir o custo da otimização. O FLIP
 emprega meta-aprendizado para inferir inicializações de circuitos parametrizados
 e pode transferir o conhecimento para circuitos maiores que os vistos no treino
 \cite{sauvage2021flip}. Qracle representa conjuntamente a Hamiltoniana e o
 ansatz como um grafo e usa uma GNN para prever parâmetros iniciais
-\cite{zhang2025qracle}. O dataset VQEzy foi proposto para sustentar esse tipo de
-aprendizado, reunindo especificações e trajetórias de otimização em diferentes
-domínios \cite{zhang2025vqezy}. Esses trabalhos evidenciam tanto o potencial do
-aprendizado quanto a importância de dados padronizados.
+\cite{zhang2025qracle}. Para apoiar esse tipo de tarefa, o conjunto de dados
+VQEzy reúne configurações e trajetórias de otimização de diferentes problemas
+\cite{zhang2025vqezy}. Em conjunto, esses trabalhos mostram tanto o potencial do
+aprendizado quanto a importância de dados organizados de forma consistente.
 
-Há ainda abordagens que alteram a arquitetura do circuito. Um agente de
-reinforcement learning pode construir ansätze
-incrementalmente, equilibrando acurácia e profundidade no LiH. Essa estratégia
-tem espaço de ações e objetivo diferentes do presente estudo: ela sintetiza um
-circuito, enquanto aqui se ordena um conjunto discreto e previamente definido
-de configurações \cite{ostaszewski2021rl}.
+Uma terceira possibilidade é usar aprendizado para alterar a arquitetura do
+circuito. Um agente de
+aprendizado por reforço pode construir ansätze aos poucos, equilibrando precisão
+e profundidade no LiH. O objetivo é diferente do nosso: esse agente cria um
+circuito, enquanto nosso modelo apenas ordena configurações definidas
+previamente \cite{ostaszewski2021rl}.
 
-A escolha do otimizador também não pode ser reduzida ao número nominal de
-iterações. Um benchmark de 30 otimizadores em 372 instâncias VQE mostrou que
-rankings por energia final e por chamadas da função podem divergir, e que
-hiperparâmetros internos alteram substancialmente o resultado
-\cite{jones2024optimisers}. Isso motiva separar, no presente estudo, redução do
-número de configurações candidatas de uma afirmação sobre custo computacional.
-
-Nosso meta-recomendador tampouco prevê a energia FCI, os ângulos do circuito ou
-a próxima atualização do otimizador. Ele seleciona, antes da execução, a
-combinação de ansatz, otimizador e profundidade com menor erro esperado. Essa
-separação permite avaliar a contribuição por métricas de recomendação e pela
-fração do grid que deixa de ser executada.
+Nosso trabalho se diferencia dessas abordagens porque não altera o circuito, não
+prevê seus ângulos e não interfere nas atualizações do otimizador. Antes da
+execução, o recomendador apenas ordena combinações prontas de ansatz, otimizador
+e profundidade pelo erro esperado. Assim, avaliamos quantas geometrias atingem
+precisão química e quanto da busca em grade deixa de ser executado.

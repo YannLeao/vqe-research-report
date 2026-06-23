@@ -1,10 +1,9 @@
 The Variational Quantum Eigensolver (VQE) depends on choices of parameterized
-circuit, optimizer, and depth. We investigate supervised learning as a
-meta-recommender that ranks configurations before execution. The evaluation
-uses 486 noiseless simulations covering three molecules, 27 geometries, and 18
-configurations per geometry, with nested cross-validation grouped by geometry.
-An MLP achieved the highest observed top-3 coverage, 85.2\%, versus 77.8\% for
-training-only global and per-molecule baselines, while evaluating three of 18
-candidates at inference. However, the paired bootstrap interval included zero,
-and leave-one-molecule-out evaluation showed weak generalization. Thus, the
-approach is promising within related molecular families but remains preliminary.
+circuit, optimizer, and depth. We use supervised learning to rank configurations
+before execution. Tests cover 486 noiseless simulations of three molecules, 27
+geometries, and 18 configurations per geometry, using nested cross-validation
+grouped by geometry. An MLP reached 85.2\% top-3 coverage, compared with 77.8\%
+for two simple selection strategies, while testing three of the 18 candidates.
+The difference was uncertain, and performance weakened when a whole molecule
+was excluded from training. The method may help with related molecules, but the
+small noiseless dataset does not support broader conclusions.

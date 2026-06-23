@@ -1,19 +1,9 @@
-O \textit{Variational Quantum Eigensolver} (VQE) depende de escolhas
-algorítmicas como circuito parametrizado, otimizador clássico e profundidade do
-circuito. Avaliar exaustivamente essas configurações torna-se custoso à medida
-que aumentam as geometrias moleculares e as alternativas candidatas. Este artigo
-investiga aprendizado supervisionado como um meta-recomendador que ordena
-configurações de VQE antes de sua execução. Foram analisadas 486 simulações
-statevector sem ruído para H$_2$, LiH e BeH$_2$, abrangendo 27 geometrias e 18
-configurações por geometria. Energias FCI/CASCI definem os rótulos de erro
-absoluto, enquanto apenas descritores disponíveis antes do VQE são usados como
-entrada. Regressão Dummy, Ridge, Random Forest e uma rede MLP são avaliadas por
-validação cruzada aninhada e agrupada por geometria. Random Forest apresentou o
-menor erro absoluto médio. A MLP obteve a maior cobertura top-3 observada,
-85,2\%, contra 77,8\% dos baselines global e por molécula calculados somente no
-treino, executando na inferência apenas três dos 18 candidatos. Entretanto, o
-intervalo bootstrap pareado da diferença incluiu zero. Sem o identificador da
-molécula, a cobertura top-3 da MLP caiu para 77,8\%; deixando uma molécula
-inteira fora do treino, a generalização também foi fraca. Os resultados indicam
-uma aplicação promissora, porém dependente da família de instâncias, e
-evidenciam as limitações do dataset pequeno e sem ruído.
+O \textit{Variational Quantum Eigensolver} (VQE) depende da escolha do circuito,
+do otimizador e da profundidade. Neste trabalho, usamos aprendizado
+supervisionado para ordenar configurações antes da execução. Os testes abrangem
+486 simulações sem ruído de três moléculas, 27 geometrias e 18 configurações por
+geometria, com validação cruzada agrupada. Uma MLP alcançou cobertura top-3 de
+85,2\%, contra 77,8\% de duas estratégias simples de seleção, avaliando três dos
+18 candidatos. A diferença foi incerta, e o desempenho piorou quando uma
+molécula inteira foi retirada do treino. O método pode ajudar em moléculas
+relacionadas, mas o conjunto pequeno e sem ruído não permite conclusões amplas.

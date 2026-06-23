@@ -1,40 +1,49 @@
 \section{Resultados e Discussão}
 
-\subsection{Caracterização do grid search}
+\subsection{Resultados da busca em grade}
+
+Antes de treinar os modelos de inteligência artificial, precisamos compreender o 
+comportamento dos dados gerados pela busca em grade (\textit{grid search}), que 
+servem como a nossa base de conhecimento. A Figura~\ref{fig:grid-summary} ilustra o 
+erro médio de cada uma das 18 configurações do VQE para as diferentes moléculas. A 
+linha pontilhada vertical representa o limite de 1 kcal/mol, que é o padrão ouro da 
+precisão química.
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=0.92\textwidth]{grid_search_summary_article.png}
-  \caption{Erro médio das configurações no grid STO-3G. A linha pontilhada
+  \caption{Erro médio das configurações na busca em grade com STO-3G. A linha pontilhada
   marca 1 kcal/mol. Bordô indica sucesso em todas as geometrias, azul em parte
   delas e cinza em nenhuma. Diferentes \textit{reps} foram agregadas.}
   \label{fig:grid-summary}
 \end{figure}
 
-A Figura~\ref{fig:grid-summary} mostra que o ranking depende do sistema. Em
-H$_2$, combinações fisicamente inspiradas atingem erros muito inferiores ao
-limiar em todas as geometrias. Em LiH, somente parte das combinações alcança
-precisão química. Em BeH$_2$, mesmo as melhores possuem erro médio acima de
-1 kcal/mol, embora resolvam algumas distâncias. Essa variação motiva um ranking
-condicionado à instância, mas também antecipa a dificuldade de generalização.
+A análise visual revela que não existe uma "configuração única ideal" para todos os
+casos, pois o desempenho depende drasticamente do sistema estudado. No caso do
+H$_2$, as combinações fisicamente inspiradas (UCCSD e PUCCSD) funcionaram 
+perfeitamente, atingindo erros muito abaixo do limite em todas as geometrias. Para 
+o LiH, o sucesso foi parcial, com apenas algumas configurações alcançando 
+a precisão desejada. Já para o BeH$_2$, o desafio foi muito maior: a 
+maioria das configurações apresentou um erro médio acima de 1 kcal/mol, embora 
+tenham resolvido com sucesso algumas distâncias específicas. 
 
 \subsection{Predição do erro}
 
-\begin{figure}[!ht]
-  \centering
-  \includegraphics[width=\textwidth]{predicted_vs_real_models.png}
-  \caption{Erro previsto e real no protocolo agrupado por geometria. A linha
-  tracejada representa predição ideal; ambos os eixos são logarítmicos.}
-  \label{fig:predictions}
-\end{figure}
+Nesta etapa, avaliamos a capacidade dos modelos de regressão de prever o valor 
+exato do erro energético de uma configuração antes que ela seja executada. A 
+Tabela~\ref{tab:regression} resume o desempenho médio dos modelos após cinco 
+divisões de validação cruzada. Para fins de interpretação, o Erro Absoluto Médio 
+(MAE) e a Raiz do Erro Quadrático Médio (RMSE) indicam diretamente o desvio das 
+previsões em kcal/mol, enquanto o MAE em log e o $R^2$ em log avaliam o acerto na 
+escala transformada.
 
 \begin{table}[!ht]
 \centering
-\caption{Média dos cinco folds no protocolo agrupado por geometria.}
+\caption{Média das cinco divisões na avaliação agrupada por geometria.}
 \label{tab:regression}
 \begin{tabular}{lrrrr}
 \toprule
-Modelo & MAE & RMSE & MAE alvo log & $R^2$ alvo log \\
+Modelo & MAE & RMSE & MAE em log & $R^2$ em log \\
        & \multicolumn{2}{c}{(kcal/mol)} & & \\
 \midrule
 Dummy         & 37,980 & 74,302 & 1,571 & -0,015 \\
@@ -45,28 +54,60 @@ MLP           & 18,746 & 37,688 & 0,596 & \textbf{0,774} \\
 \end{tabular}
 \end{table}
 
-A Tabela~\ref{tab:regression} mostra que Random Forest obteve os menores MAE e
-RMSE, enquanto a MLP apresentou o maior $R^2$ log. A
-Figura~\ref{fig:predictions} indica que ambos capturam a separação entre erros
-baixos e altos, mas comprimem extremos. A transformação logarítmica evita que
-poucos erros de centenas de kcal/mol dominem o ajuste. O piso visual em
-$10^{-6}$ decorre apenas do gráfico: predições negativas no alvo log foram
-truncadas em zero e, para exibição em escala logarítmica, zero foi representado
-por $10^{-6}$ kcal/mol.
+Os resultados apontam que o modelo Random Forest obteve os menores erros médios na 
+escala original (menores valores de MAE e RMSE). Por outro lado, a rede neural 
+(MLP) apresentou o maior coeficiente de determinação ($R^2 = 0,774$) na escala 
+logarítmica, o que significa que ela conseguiu explicar aproximadamente 77,4\% da 
+variação dos dados nessa escala mapeada. O modelo de linha de base 
+(\textit{Dummy}), que apenas chuta a média dos dados de treino, obteve um $R^2$ 
+negativo, confirmando que os modelos baseados em IA realmente aprenderam padrões 
+úteis.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\textwidth]{predicted_vs_real_models.png}
+  \caption{Erro previsto e real na avaliação agrupada por geometria. A linha
+  tracejada representa predição ideal; ambos os eixos são logarítmicos.}
+  \label{fig:predictions}
+\end{figure}
+
+A Figura~\ref{fig:predictions} permite visualizar a relação entre o erro real (eixo
+horizontal) e o erro previsto pelos modelos (eixo vertical). Nota-se que tanto a 
+Random Forest quanto a MLP conseguem distinguir com clareza os erros grandes dos 
+erros pequenos, concentrando os pontos ao redor da linha ideal tracejada. 
+
+Contudo, ambos os modelos enfrentam dificuldades com valores extremos. É aqui que 
+se justifica a importância da transformação logarítmica aplicada à variável alvo 
+($y$): se usássemos os valores brutos, as poucas falhas catastróficas de otimização 
+clássica (erros na casa de centenas de kcal/mol) teriam um peso desproporcional, 
+distorcendo o aprendizado do modelo. Por fim, o valor artificial de $10^{-6}$ 
+visível no gráfico foi adotado estritamente por razões de plotagem, permitindo 
+exibir na escala logarítmica as previsões negativas que foram ajustadas para zero.
 
 \subsection{Qualidade das recomendações}
 
-Somente 23 das 27 geometrias possuem ao menos um candidato dentro da precisão
-química; 85,2\% é, portanto, o teto de cobertura deste grid.
+O objetivo principal deste trabalho não é apenas prever o erro exato, mas sim 
+utilizar essa previsão para ordenar as configurações e recomendar as melhores. É 
+importante destacar uma limitação matemática dos nossos dados: das 27 geometrias 
+testadas na busca em grade, apenas 23 possuem pelo menos uma configuração capaz de 
+atingir a precisão química. Portanto, mesmo um modelo perfeito (o "Oráculo") não 
+conseguiria ultrapassar o teto de 85,2\% de cobertura (23 dividido por 27) nesta 
+base de dados.
+
+A Tabela~\ref{tab:topk} detalha a eficiência dessa recomendação nos cenários 
+\textit{top}-1 (onde testamos apenas a primeira escolha do modelo), \textit{top}-3 
+(onde testamos as três primeiras alternativas) e \textit{top}-5. A coluna 
+"Cobertura" indica a porcentagem de geometrias em que o sucesso foi alcançado 
+utilizando as indicações do modelo.
 
 \begin{table}[!ht]
 \centering
-\caption{Resultados top-$k$ agrupados por geometria. Erro e regret em
-kcal/mol; a última coluna conta candidatos evitados na inferência.}
+\caption{Resultados top-$k$ agrupados por geometria. Os erros estão em kcal/mol;
+a última coluna mostra os candidatos que deixam de ser testados.}
 \label{tab:topk}
 \begin{tabular}{llrrrr}
 \toprule
-Modelo & $k$ & Cobertura & Erro & Regret & Candidatos evitados \\
+Modelo & $k$ & Cobertura & Erro & Dif. melhor & Candidatos evitados \\
 \midrule
 Aleatório       & 1 & 26,9\% & 40,099 & 39,316 & 94,4\% \\
 Melhor global   & 1 & 77,8\% &  1,410 &  0,627 & 94,4\% \\
@@ -78,44 +119,55 @@ Melhor global   & 3 & 77,8\% &  1,008 &  0,225 & 83,3\% \\
 Melhor/molécula & 3 & 77,8\% &  1,008 &  0,225 & 83,3\% \\
 Random Forest   & 3 & 77,8\% &  0,961 &  0,178 & 83,3\% \\
 MLP             & 3 & \textbf{85,2\%} & \textbf{0,783} & \textbf{0,000} & 83,3\% \\
-Oráculo         & 3 & 85,2\% & 0,783 & 0,000 & -- \\
+Melhor possible & 3 & 85,2\% & 0,783 & 0,000 & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-A Tabela~\ref{tab:topk} mostra que, no top-1, a MLP não supera o melhor
-baseline global. No top-3, a maior cobertura observada foi da MLP: 85,2\%
-contra 77,8\% dos baselines global e por molécula, diferença de apenas duas
-geometrias. O bootstrap pareado da diferença foi 7,4 pontos percentuais, com
-IC$_{95\%}$ de 0,0 a 18,5 por geometria e de 0,0 a 22,2 ao reamostrar moléculas
-como clusters. Logo, os dados não demonstram vantagem estatística da MLP.
+Ao analisarmos o cenário \textit{top}-1, observamos que a MLP empata em cobertura (77,8\%) com a estratégia simples de escolher a melhor configuração geral 
+encontrada no treino (\textit{Melhor global}). No entanto, o grande trunfo do 
+modelo surge no cenário \textit{top}-3: a MLP saltou para 85,2\% de cobertura, 
+atingindo o limite teórico máximo possível e superando as estratégias fixas em 7,4 
+pontos percentuais (o que equivale a acertar duas geometrias a mais). Além disso, a 
+diferença média para o melhor candidato disponível foi zerada ($0,000$).
+
+Contudo, para garantir a honestidade científica do estudo, realizamos um teste 
+estatístico usando a técnica de \textit{bootstrap}. O intervalo de 
+confiança de 95\% para essa diferença de desempenho variou de 0,0 a 18,5 pontos (ao 
+reamostrar geometrias) e de 0,0 a 22,2 pontos (ao reamostrar moléculas). Como ambos 
+os intervalos incluem o valor zero, a estatística nos alerta que, devido ao tamanho 
+reduzido da nossa base de dados, ainda não podemos afirmar com certeza absoluta que 
+a MLP é superior às estratégias mais simples.
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=0.86\textwidth]{topk_success_vs_reduction.png}
-  \caption{Cobertura top-$k$ versus fração de candidatos não executados na
-  inferência. Os pontos da MLP identificam $k=1,3,5$; faixas representam
-  intervalos bootstrap de 95\%.}
+  \caption{Cobertura top-$k$ versus fração de candidatos não executados. Os
+  pontos da MLP identificam $k=1,3,5$; as faixas mostram intervalos de confiança
+  de 95\% obtidos por reamostragem.}
   \label{fig:topk}
 \end{figure}
 
-A Figura~\ref{fig:topk} apresenta o compromisso entre cobertura e quantidade de
-candidatos. Para $k=3$, o recomendador executaria três em vez de 18 candidatos,
-redução nominal de 83,3\%. Isso não equivale a 83,3\% de tempo ou custo
-quântico: ansätze e otimizadores possuem profundidades e números de chamadas
-diferentes. Além disso, produzir o modelo exigiu previamente as 486 execuções.
-O benefício depende, portanto, de amortizar o treinamento em novas geometrias
-relacionadas. O oráculo é apenas limite superior e requer conhecer o grid todo.
+A utilidade prática é visível na Figura~\ref{fig:topk}: com \textit{top}-3, o
+usuário executa apenas 3 das 18 configurações, eliminando 83,3\% dos candidatos.
+Vale notar que essa redução no número de execuções não se traduz linearmente em
+economia de tempo, pois diferentes circuitos impõem demandas computacionais
+distintas, e o treinamento inicial exige a busca em grade completa. A curva
+``Oráculo'' ilustra o teto ideal de desempenho.
 
-\subsection{Ablação e generalização}
+\subsection{Importância da molécula e uso em novos casos}
+
+Para compreender o que a rede neural de fato aprendeu, realizamos testes de 
+estresse removendo informações do modelo, conforme sintetizado na 
+Tabela~\ref{tab:ablation}.
 
 \begin{table}[!ht]
 \centering
-\caption{Desempenho da MLP nos protocolos de generalização.}
+\caption{Desempenho da MLP nas diferentes formas de avaliação.}
 \label{tab:ablation}
 \begin{tabular}{lrrr}
 \toprule
-Protocolo & MAE alvo log & $R^2$ alvo log & Cobertura top-3 \\
+Avaliação & MAE em log & $R^2$ em log & Cobertura top-3 \\
 \midrule
 Geometrias, com molécula & 0,596 &  0,774 & 85,2\% \\
 Geometrias, sem molécula & 0,629 &  0,754 & 77,8\% \\
@@ -124,16 +176,27 @@ Molécula não vista       & 1,274 & -0,104 & 77,8\% \\
 \end{tabular}
 \end{table}
 
-Como mostra a Tabela~\ref{tab:ablation}, remover o identificador molecular
-reduziu a cobertura top-3 da MLP ao mesmo valor do baseline global. Ao deixar
-uma molécula inteira fora do treino, o $R^2$ log tornou-se negativo. Assim,
-parte relevante do sinal aprendido é um ranking típico das famílias moleculares
-observadas, e não uma representação química geral.
+Os resultados revelam um comportamento crítico da IA. Quando ocultamos o nome 
+categórico da molécula, a cobertura \textit{top}-3 da MLP caiu de 85,2\% para 
+77,8\%, igualando-se à estratégia estática. O cenário tornou-se ainda mais severo 
+no teste de "Molécula não vista", onde retiramos uma molécula inteira do 
+treinamento e tentamos adivinhar suas configurações: o coeficiente $R^2$ desabou 
+para um valor negativo ($-0,104$). 
 
-O estudo usa somente três moléculas, STO-3G, uma semente, 100 iterações e
-simulação ideal. O bootstrap por geometria subestima potencialmente a
-dependência intramolecular; o intervalo por clusters usa apenas três unidades e
-também é impreciso. O recomendador escolhe apenas candidatos presentes no grid
-e não cria ansätze nem substitui a otimização dos parâmetros. Os resultados
-demonstram viabilidade dentro do domínio estudado, não generalização para
-hardware, bases maiores ou moléculas arbitrárias.
+Em termos práticos, um $R^2$ negativo significa que o modelo teve um desempenho 
+pior do que se simplesmente chutássemos a média dos erros conhecidos. Isso prova
+que a nossa inteligência artificial não aprendeu leis gerais da química quântica 
+aplicáveis a qualquer cenário; em vez disso, ela memorizou quais configurações 
+funcionam melhor para cada família de moléculas que ela já conhecia de antemão.
+
+Diante disso, é preciso pontuar com clareza os limites deste estudo piloto: ele 
+baseia-se em apenas três moléculas pequenas, utiliza uma base restrita (STO-3G), 
+uma única semente de inicialização, um teto rígido de 100 iterações e simulações 
+perfeitamente limpas (isentas de ruído quântico). Embora a nossa análise trate cada 
+variação geométrica como um caso separado, reconhecemos que as geometrias 
+pertencentes a uma mesma molécula guardam forte correlação entre si. 
+
+Por fim, o recomendador atua de forma passiva — filtra e ordena candidatos
+pré-existentes, sem criar novos \textit{ansätze} nem interferir na otimização
+interna do VQE. Os resultados são, portanto, estritamente válidos para o escopo
+delimitado, exigindo cautela antes de qualquer extensão a hardware real.

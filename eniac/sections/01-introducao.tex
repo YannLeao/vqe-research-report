@@ -1,36 +1,40 @@
 \section{Introdução}
 
-A determinação da energia do estado fundamental é uma tarefa central em
-estrutura eletrônica. Métodos exatos, como \textit{Full Configuration
-Interaction} (FCI), têm custo que cresce combinatoriamente com o tamanho do
-sistema, o que motiva o estudo de algoritmos quânticos para química. No cenário
-de dispositivos quânticos ruidosos e de escala intermediária
-\cite{preskill2018nisq}, o \textit{Variational Quantum Eigensolver} (VQE)
-\cite{peruzzo2014variational} tornou-se uma das principais abordagens híbridas
-para estimar energias moleculares.
+A energia do estado fundamental, isto é, a menor energia possível de uma
+molécula, ajuda a explicar propriedades como estabilidade e formação de
+ligações. Calculá-la, porém, torna-se difícil à medida que o sistema molecular
+cresce. Mesmo métodos clássicos precisos, como o \textit{Full Configuration
+Interaction} (FCI), possuem custo combinatório, o que tem motivado o uso de
+algoritmos quânticos na química. Como atualmente trabalhamos com dispositivos
+quânticos ruidosos e de escala intermediária \cite{preskill2018nisq}, o
+\textit{Variational Quantum Eigensolver} (VQE) \cite{peruzzo2014variational}
+tornou-se uma das principais alternativas para estimar essas energias.
 
-O desempenho do VQE, contudo, não é determinado apenas pela Hamiltoniana. É
-necessário escolher uma família de circuitos parametrizados (\textit{ansatz}),
-um otimizador clássico, uma profundidade e um ponto inicial. Essas decisões
-alteram expressividade, custo de execução e dificuldade de otimização
-\cite{cerezo2021variational}. Uma estratégia comum consiste em executar um grid
-search e selecionar a configuração com menor erro. Essa abordagem é útil para
-caracterização experimental, mas exige executar todos os candidatos em cada
-geometria molecular.
+O resultado do VQE, entretanto, não depende apenas da Hamiltoniana, que é a
+representação matemática da energia da molécula. Também é preciso escolher o
+modelo do circuito parametrizado, chamado \textit{ansatz}, além do otimizador
+clássico, da profundidade do circuito e do ponto inicial. Essas escolhas afetam
+a capacidade do circuito de representar a solução, seu custo de execução e a
+dificuldade da otimização \cite{cerezo2021variational}. Uma forma comum de
+compará-las é testar todas as combinações de uma busca em grade
+(\textit{grid search}) e escolher a de menor erro. Embora seja simples, essa
+estratégia exige executar todos os candidatos para cada geometria molecular,
+ou seja, para cada disposição dos núcleos da molécula.
 
-Este trabalho formula a escolha de configurações como um problema de
-recomendação supervisionada. Um modelo recebe descritores conhecidos antes da
-execução, como distância internuclear, ansatz, otimizador, número de repetições,
-qubits e termos da Hamiltoniana, e estima o erro energético esperado. As
-configurações são então ordenadas, permitindo executar somente as $k$ mais
-promissoras. O modelo não substitui o otimizador clássico: ele atua em um nível
-anterior, selecionando quais combinações merecem ser avaliadas.
+É justamente essa quantidade de combinações que buscamos reduzir. Para isso,
+tratamos a escolha da configuração como um problema de recomendação
+supervisionada. O modelo recebe informações conhecidas antes da execução, como
+distância entre os núcleos, ansatz, otimizador, número de repetições, qubits e
+tamanho da Hamiltoniana, e estima o erro energético de cada opção. Em seguida,
+as configurações são ordenadas e apenas as $k$ mais promissoras são testadas.
+Portanto, o modelo não substitui o otimizador clássico; ele apenas indica quais
+combinações devem ser avaliadas primeiro.
 
-As contribuições são: (i) a consolidação de 486 execuções VQE rotuladas por
-referências FCI/CASCI; (ii) a comparação, sem vazamento entre geometrias, de
-baselines lineares, árvores e uma rede neural; (iii) uma avaliação top-$k$ que
-quantifica cobertura de precisão química, regret e redução de candidatos na
-inferência; e (iv) baselines por molécula, uma ablação do identificador molecular
-e um teste exploratório em moléculas não vistas. Por se tratar de três moléculas
-pequenas, uma base mínima e simulação sem ruído, os resultados são apresentados
-como estudo piloto.
+Dessa forma, as principais contribuições deste trabalho são: (i) reunir 486
+execuções VQE e compará-las com energias de referência calculadas por FCI ou
+CASCI; (ii) comparar modelos lineares, árvores e uma rede neural sem misturar a
+mesma geometria no treino e no teste; (iii) medir quantas geometrias atingem
+precisão química quando apenas os $k$ primeiros candidatos são executados; e
+(iv) verificar o efeito de retirar o nome da molécula e de testar uma molécula
+que não apareceu no treino. Como o estudo usa apenas três moléculas pequenas,
+uma base mínima e simulação sem ruído, seus resultados ainda são preliminares.

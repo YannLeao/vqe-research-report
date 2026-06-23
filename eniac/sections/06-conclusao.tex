@@ -1,38 +1,28 @@
 \section{Conclusão}
 
-Este trabalho apresentou um estudo piloto de recomendação supervisionada de
-configurações VQE. O problema foi formulado como regressão do erro energético e
-ranking de 18 candidatos por geometria. A validação agrupada impediu que uma
-mesma geometria aparecesse simultaneamente em treino e teste, enquanto os
-baselines foram estimados exclusivamente com os folds de treinamento.
+Este trabalho apresentou um estudo piloto sobre o uso de aprendizado de máquina
+para reduzir o número de configurações testadas no VQE. Modelos preditivos estimam
+o erro energético de cada candidato e ordenam as opções antes da execução, com
+validação cruzada agrupada por geometria. O Random Forest obteve o menor erro
+absoluto de regressão, enquanto a MLP atingiu 85,2\% de cobertura no cenário
+\textit{top}-3 — o teto máximo deste conjunto — superando em 7,4 pontos percentuais
+as estratégias estáticas. Essa vantagem equivale a apenas duas geometrias adicionais,
+e os intervalos de \textit{bootstrap} incluem zero, de modo que a superioridade da
+MLP permanece estatisticamente incerta. Os testes de estresse mostraram, ainda, que o
+modelo depende do nome da molécula: sem essa informação, ou diante de uma molécula
+inédita, o desempenho caiu ao nível das estratégias simples, indicando memorização de
+padrões por família e não aprendizado de leis gerais da química quântica. A principal
+contribuição deste piloto é demonstrar que simulações passadas podem guiar
+inteligentemente novos casos correlacionados, eliminando 83,3\% dos candidatos da
+busca em grade — embora essa redução não se traduza linearmente em economia de tempo,
+dado o custo distinto de cada circuito e o investimento inicial de coleta dos dados de
+treino.
 
-O Random Forest obteve o menor erro absoluto de regressão. Na métrica principal
-de recomendação, a MLP apresentou a maior cobertura top-3 observada: 85,2\%,
-contra 77,8\% dos baselines global e por molécula. Essa diferença corresponde a
-apenas duas das 27 geometrias e seu intervalo bootstrap pareado incluiu zero;
-portanto, os dados atuais não demonstram superioridade estatística da MLP. A
-ablação sem o identificador molecular reduziu sua cobertura top-3 para 77,8\%,
-e o protocolo de exclusão de uma molécula apresentou generalização preditiva
-fraca. Esses resultados indicam que parte relevante do sinal aprendido ainda é
-específica das moléculas observadas.
-
-Selecionar três dos 18 candidatos evita avaliar 83,3\% do grid durante a
-aplicação do recomendador. Esse percentual não representa redução equivalente
-de tempo ou custo computacional: o treinamento utilizou as 486 execuções
-existentes e configurações VQE possuem custos heterogêneos. Assim, a evidência
-central deste estudo não é que uma rede substitui a otimização VQE, mas que a
-formulação como recomendação top-$k$ oferece um protocolo mensurável para
-investigar a reutilização de dados de caracterização em geometrias relacionadas.
-
-Trabalhos futuros devem ampliar moléculas, bases, sementes e modelos de ruído;
-incorporar descritores físico-químicos independentes do nome da molécula;
-considerar custo de circuito e tempo de execução em um objetivo multiobjetivo;
-e avaliar se o custo inicial de construção do dataset é amortizado em novas
-geometrias. Descritores espectrais da paisagem, incluindo informação de Fourier,
-também poderão ser investigados como sinais de dificuldade de otimização ou
-para seleção de pontos iniciais.
-
-Os artefatos completos serão vinculados publicamente apenas na versão final,
-após a revisão anônima. A ampliação do dataset poderá, então, ser conduzida de
-forma incremental e comparável, preservando configurações bem-sucedidas e
-falhas experimentais relevantes para o aprendizado do recomendador.
+Como trabalhos futuros, pretendemos ampliar o estudo com mais moléculas e bases
+atômicas, múltiplas sementes de inicialização e modelos de ruído para aproximar as
+simulações de hardware NISQ real. Também investigaremos atributos físico-químicos
+universais que dispensem o nome categórico da molécula, uma avaliação multiobjetivo
+que equilibre erro, custo do circuito e tempo de execução, e o ponto de equilíbrio
+financeiro entre investimento no treino e ganho nas previsões subsequentes. O
+código-fonte e os dados serão disponibilizados publicamente após a revisão
+duplo-anônima.

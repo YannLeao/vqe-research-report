@@ -2,76 +2,97 @@
 
 \subsection{Estrutura eletrônica em computadores quânticos}
 
-Na aproximação de Born--Oppenheimer, os núcleos são tratados como fixos para
-cada geometria e resolve-se o problema eletrônico. Em segunda quantização, a
-Hamiltoniana é escrita em termos de operadores fermiônicos de criação e
-aniquilação. Uma transformação como Jordan--Wigner os converte em uma soma de
-produtos de Pauli,
+Para calcular a energia de uma molécula, é necessário descrever como seus
+elétrons se comportam em torno dos núcleos. Como os núcleos são muito mais
+pesados e se movem mais lentamente, a aproximação de Born--Oppenheimer permite
+tratá-los como fixos em cada geometria e resolver apenas o problema eletrônico.
+Esse problema é representado pela Hamiltoniana, um operador que reúne as
+contribuições de energia do sistema.
+
+Para executar esse cálculo em um computador quântico, a Hamiltoniana eletrônica
+precisa ser traduzida para operações sobre qubits. Primeiro, a chamada segunda
+quantização descreve quais orbitais estão ocupados por elétrons. Em seguida, a
+transformação de Jordan--Wigner converte essa descrição em uma soma de produtos
+de operadores de Pauli,
 \begin{equation}
  H_q = \sum_j c_j P_j, \qquad
  P_j \in \{I,X,Y,Z\}^{\otimes n},
 \end{equation}
-que pode ser medida por um computador quântico. O número de qubits depende do
-número de spin-orbitais mantidos e o número de termos $P_j$ oferece um descritor
-simples do tamanho da Hamiltoniana.
+em que cada $P_j$ representa uma operação que pode ser medida no circuito
+quântico e cada $c_j$ indica seu peso na energia total. O número de qubits
+depende da quantidade de orbitais eletrônicos mantidos no cálculo. Já a
+quantidade de termos $P_j$ fornece uma medida simples do tamanho do problema.
 
-As energias exatas no espaço orbital escolhido são obtidas por \textit{Full
-Configuration Interaction} (FCI). Quando se emprega um espaço ativo, CASCI
-diagonaliza a Hamiltoniana somente nos orbitais selecionados. Neste estudo,
-essas energias são referências para calcular o erro do VQE, e não entradas dos
-modelos de aprendizado. Os cálculos clássicos foram realizados com PySCF
-\cite{sun2018pyscf}.
+Depois de definir essa representação, é preciso obter uma energia de referência
+para avaliar o VQE. O \textit{Full Configuration Interaction} (FCI) testa todas
+as distribuições possíveis dos elétrons nos orbitais considerados e fornece a
+solução exata dentro desse espaço. Como esse cálculo cresce rapidamente, o
+\textit{Complete Active Space Configuration Interaction} (CASCI) restringe a
+busca aos orbitais mais importantes, chamados de espaço ativo. Neste estudo, as
+energias FCI e CASCI servem apenas para calcular o erro do VQE; elas não são
+fornecidas aos modelos de aprendizado. Esses cálculos clássicos foram realizados
+com PySCF \cite{sun2018pyscf}.
 
 \subsection{Variational Quantum Eigensolver}
 
-O VQE explora o princípio variacional: para qualquer estado normalizado, o
-valor esperado da Hamiltoniana limita superiormente a energia do estado
-fundamental. O algoritmo prepara um estado parametrizado
-$\lvert\psi(\boldsymbol{\theta})\rangle$ e minimiza
+Com o problema eletrônico escrito em termos de qubits, o VQE procura uma
+aproximação para o estado de menor energia. Para isso, utiliza o princípio
+variacional: a energia calculada para qualquer estado quântico válido nunca é
+menor que a energia verdadeira do estado fundamental. Assim, o algoritmo prepara
+um estado $\lvert\psi(\boldsymbol{\theta})\rangle$, controlado por parâmetros
+ajustáveis $\boldsymbol{\theta}$, e busca minimizar
 \begin{equation}
  E(\boldsymbol{\theta}) =
  \langle\psi(\boldsymbol{\theta})\rvert H
  \lvert\psi(\boldsymbol{\theta})\rangle .
 \end{equation}
-O processador quântico estima os valores esperados dos termos de Pauli,
-enquanto um otimizador clássico atualiza $\boldsymbol{\theta}$
-\cite{mcclean2016theory}. Essa arquitetura híbrida foi demonstrada em moléculas
-pequenas com circuitos eficientes em hardware \cite{kandala2017hardware}.
+Nesse processo, o computador quântico estima a energia do estado preparado,
+enquanto um otimizador clássico atualiza os parâmetros
+$\boldsymbol{\theta}$ \cite{mcclean2016theory}. O ciclo se repete até que a
+energia deixe de melhorar ou outro critério de parada seja alcançado. Essa
+combinação entre circuito quântico e otimização clássica já foi demonstrada em
+moléculas pequenas \cite{kandala2017hardware}.
 
-Ansätze fisicamente inspirados, como UCCSD e sua versão pareada PUCCSD,
-incorporam excitações da função de onda eletrônica. Em contrapartida,
-RealAmplitudes e EfficientSU2 são circuitos heurísticos construídos com camadas
-de rotações e emaranhamento. A profundidade, controlada aqui por
-\textit{repetitions} (\textit{reps}), aumenta a expressividade, mas também o
-número de parâmetros e o custo do circuito. Circuitos muito expressivos podem
-apresentar regiões de gradientes muito pequenos, conhecidas como
-\textit{barren plateaus} \cite{mcclean2018barren}.
+Um elemento central desse ciclo é o \textit{ansatz}: o modelo de circuito usado
+para preparar possíveis soluções. Ansätze como UCCSD e PUCCSD usam conhecimento
+da estrutura eletrônica; RealAmplitudes e EfficientSU2 seguem modelos mais gerais,
+com camadas de rotações e emaranhamento. A profundidade é controlada pelo número
+de repetições (\textit{reps}): mais camadas aumentam a expressividade, mas elevam
+o número de parâmetros e o risco de \textit{barren plateaus}
+\cite{mcclean2018barren} — regiões de gradiente próximo de zero análogas a
+platôs na função de perda de redes neurais.
 
-COBYLA e SLSQP realizam buscas determinísticas com aproximações locais,
-enquanto SPSA estima a direção de atualização por perturbações estocásticas.
-Logo, a configuração do VQE envolve compromissos entre estrutura física,
-profundidade e comportamento do otimizador. Não existe uma escolha
-universalmente superior para todas as moléculas e geometrias.
+É nesse ponto que também importa a escolha do otimizador clássico. COBYLA e
+SLSQP realizam buscas determinísticas a partir de aproximações locais, enquanto
+SPSA estima a direção de atualização por pequenas perturbações aleatórias. A
+configuração do VQE é, portanto, uma combinação entre tipo de circuito,
+profundidade e otimizador — e essa combinação responde de forma diferente a cada
+molécula e geometria.
 
-Neste estudo, uma configuração atinge precisão química quando
-$\lvert E_{\mathrm{VQE}}-E_{\mathrm{ref}}\rvert\leq 1$ kcal/mol. Esse limiar
-transforma a qualidade energética em um critério prático de sucesso, mas o
-modelo é treinado para regressão do erro contínuo, preservando a ordenação
-entre candidatos \cite{petruzielo2012chemical}.
+Para comparar essas escolhas, adotamos como referência a precisão química. Neste
+estudo, uma configuração atinge esse nível quando
+$\lvert E_{\mathrm{VQE}}-E_{\mathrm{ref}}\rvert\leq 1$ kcal/mol, ou seja,
+quando sua energia difere da referência em, no máximo, 1 kcal/mol. Esse limite
+fornece um critério prático de sucesso. Ainda assim, o modelo é treinado
+para prever o valor contínuo do erro, pois essa informação permite ordenar
+configurações que estejam acima ou abaixo do limite
+\cite{petruzielo2012chemical}.
 
 \subsection{Seleção supervisionada de configurações}
 
-O problema de seleção de algoritmos consiste em escolher, a partir de
-características de uma instância, o método com melhor desempenho esperado
-\cite{rice1976algorithm}. Aqui, cada instância é uma geometria molecular e cada
-candidato é uma configuração VQE. Em vez de classificar diretamente um único
-vencedor, estima-se uma função de custo para todos os candidatos e utiliza-se a
-ordenação prevista.
+As escolhas anteriores transformam cada execução do VQE em uma combinação de
+ansatz, profundidade e otimizador. Do ponto de vista da inteligência artificial,
+decidir qual combinação usar é um problema de seleção de algoritmos: a partir
+das características de um caso, procura-se o método com melhor desempenho
+esperado \cite{rice1976algorithm}. Neste trabalho, cada caso corresponde a uma
+geometria molecular e cada candidato corresponde a uma configuração VQE. Em vez
+de prever diretamente um único vencedor, o modelo estima o erro de todos os
+candidatos e os ordena por esse valor.
 
-Modelos lineares oferecem um baseline interpretável; Random Forest representa
-relações não lineares em dados tabulares \cite{breiman2001random}; e redes
-multicamadas aproximam mapeamentos não lineares por camadas sucessivas
-\cite{hornik1989multilayer}. A regressão fornece uma pontuação comparável para
-todos os candidatos. Ordená-los por erro previsto transforma o problema em
-recomendação top-$k$: executam-se poucos candidatos e conserva-se o melhor
-resultado observado entre eles.
+Para realizar essa previsão, modelos lineares oferecem uma referência simples e
+fácil de interpretar. O Random Forest permite representar relações não lineares
+em dados tabulares \cite{breiman2001random}, enquanto redes multicamadas capturam
+padrões mais complexos. Independentemente
+do modelo, a regressão atribui um erro previsto a cada candidato. Por fim, na
+recomendação top-$k$, executam-se apenas os $k$ candidatos com menor erro
+previsto e conserva-se o melhor resultado encontrado entre eles.

@@ -1,33 +1,59 @@
 \section{Metodologia}
 
-\subsection{Pipeline e dataset}
+\subsection{Ferramentas e organização dos experimentos}
+
+O pipeline foi implementado em Python 3.11.15 em três etapas: cálculo clássico das
+energias de referência com PySCF 2.13.0 \cite{sun2018pyscf}; mapeamento para
+qubits, gerenciamento de espaços ativos e execução do VQE com Qiskit Nature 0.7.2
+\cite{qiskitnature2026}, Qiskit 2.3.0 \cite{javadi2024qiskit} e Qiskit Algorithms
+0.4.0; e treinamento e validação dos modelos com scikit-learn 1.9.0
+\cite{pedregosa2011scikit}. O código-fonte terá repositório público revelado após
+a revisão duplo-anônima.
+
+\subsection{Etapas e conjunto de dados}
 
 \begin{figure}[ht]
   \centering
   \includegraphics[width=\textwidth]{pipeline.png}
-  \caption{Pipeline de construção do dataset e recomendação top-$k$. A
+  \caption{Etapas de construção do conjunto de dados e recomendação top-$k$. A
   energia FCI/CASCI é usada somente para produzir o rótulo de erro.}
   \label{fig:pipeline}
 \end{figure}
 
-Como ilustra a Figura~\ref{fig:pipeline}, cada geometria é resolvida por um
-método clássico de referência e pelo grid VQE. As execuções formam o conjunto
-rotulado usado para treinar o recomendador, que ordena os 18 candidatos e
-retorna apenas os $k$ primeiros.
+Como ilustra a Figura~\ref{fig:pipeline}, para cada geometria calculamos uma
+energia clássica de referência e executamos as 18 configurações da busca em
+grade do VQE. Os erros obtidos formam os dados de treinamento. Depois de
+treinado, o recomendador ordena os candidatos de uma geometria e indica apenas
+os $k$ primeiros para execução.
 
-Foram usadas H$_2$, LiH e BeH$_2$ na base STO-3G. As distâncias, em
-\AA, foram: H$_2$ $\{0{,}3438,0{,}5521,0{,}7778,0{,}9861,1{,}2118,
-1{,}4201,1{,}6285,1{,}8542,2{,}0625\}$; LiH $\{0{,}8125,1{,}2639,
-1{,}7563,2{,}2898,2{,}7822,3{,}3157,3{,}8491,4{,}3826,4{,}8750\}$; e
-BeH$_2$ $\{0{,}5000,0{,}9615,1{,}2563,1{,}5088,1{,}7769,2{,}1717,
-2{,}6136,3{,}1818,3{,}7500\}$. H$_2$ usa o espaço completo de dois elétrons
-e dois orbitais espaciais. Após congelar o caroço, LiH usa CAS(2e,3o) e
-BeH$_2$, CAS(4e,4o), sempre com os primeiros orbitais ativos. Jordan--Wigner
-produz, respectivamente, 4, 6 e 8 qubits.
+Foram usadas H$_2$, LiH e BeH$_2$ na base STO-3G, com nove geometrias para cada
+molécula. A Tabela~\ref{tab:distances} apresenta as distâncias avaliadas.
 
 \begin{table}[ht]
 \centering
-\caption{Caracterização do dataset. A última coluna indica execuções que
+\caption{Distâncias internucleares avaliadas, em \AA.}
+\label{tab:distances}
+\begin{tabular}{@{}lp{0.78\textwidth}@{}}
+\toprule
+Molécula & Distâncias \\
+\midrule
+H$_2$   & 0,3438; 0,5521; 0,7778; 0,9861; 1,2118; 1,4201; 1,6285; 1,8542; 2,0625 \\
+LiH     & 0,8125; 1,2639; 1,7563; 2,2898; 2,7822; 3,3157; 3,8491; 4,3826; 4,8750 \\
+BeH$_2$ & 0,5000; 0,9615; 1,2563; 1,5088; 1,7769; 2,1717; 2,6136; 3,1818; 3,7500 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Para H$_2$, mantivemos o espaço completo de dois elétrons e dois orbitais
+espaciais. Em LiH e BeH$_2$, os elétrons mais internos foram mantidos fixos para
+reduzir o tamanho do problema. Com isso, usamos os espaços ativos CAS(2e,3o) e
+CAS(4e,4o), respectivamente, em que ``e'' indica elétrons e ``o'', orbitais. A
+transformação de Jordan--Wigner resultou em 4 qubits para H$_2$, 6 para LiH e 8
+para BeH$_2$.
+
+\begin{table}[ht]
+\centering
+\caption{Resumo do conjunto de dados. A última coluna indica execuções que
 atingiram precisão química.}
 \label{tab:dataset}
 \begin{tabular}{lrrrr}
@@ -43,56 +69,51 @@ Total   & -- & 27 & 486 & 130 (26,7\%) \\
 \end{tabular}
 \end{table}
 
-A Tabela~\ref{tab:dataset} resume as 486 execuções. Em cada geometria, o
-grid combina RealAmplitudes, EfficientSU2, UCCSD e PUCCSD com COBYLA, SLSQP e
-SPSA. Os circuitos heurísticos usam \textit{reps} 1 e 2, rotações padrão do
-Qiskit e emaranhamento linear; UCCSD e PUCCSD usam uma camada e o estado
-Hartree--Fock, enquanto os heurísticos partem de $\lvert0\rangle^{\otimes n}$.
-Todos os parâmetros iniciais são amostrados de $U[-\pi,\pi]$ com semente 137.
-Os otimizadores usam os padrões da biblioteca e limite de 100 iterações, sem
-tolerância adicional definida. O estimador statevector é exato, sem shots ou
-ruído.
+A Tabela~\ref{tab:dataset} resume as 486 execuções. Em cada geometria, combinamos
+os ansätze RealAmplitudes, EfficientSU2, UCCSD e PUCCSD com os otimizadores
+COBYLA, SLSQP e SPSA. RealAmplitudes e EfficientSU2 usam uma ou duas repetições,
+rotações padrão do Qiskit, emaranhamento linear e todos os qubits inicialmente
+em zero. UCCSD e PUCCSD usam uma camada e partem do estado eletrônico de
+referência gerado na preparação da molécula. Os parâmetros iniciais são
+amostrados de $U[-\pi,\pi]$ com semente 137. Mantivemos as configurações padrão
+dos otimizadores e limitamos cada execução a 100 iterações. As simulações usam
+vetor de estado exato, sem amostragem (\textit{shots}) e sem ruído.
 
-O alvo é $y=\ln(1+|E_{\mathrm{VQE}}-E_{\mathrm{ref}}|_{\mathrm{kcal/mol}})$,
-onde $\ln$ denota logaritmo natural. As variáveis categóricas são molécula,
-ansatz e otimizador; as numéricas são distância, \textit{reps}, qubits e termos
-da Hamiltoniana. Energias, erros, tempos e avaliações do otimizador são
-excluídos para evitar vazamento.
+O modelo prevê o logaritmo do erro energético,
+$y=\ln(1+|E_{\mathrm{VQE}}-E_{\mathrm{ref}}|_{\mathrm{kcal/mol}})$. Essa
+transformação reduz o peso dos poucos erros muito altos durante o treinamento.
+As entradas categóricas são molécula, ansatz e otimizador; as numéricas são
+distância, número de repetições, qubits e termos da Hamiltoniana. Energias,
+erros, tempos e avaliações do otimizador são excluídos porque só seriam
+conhecidos após a execução e causariam vazamento de informação.
 
-\subsection{Modelos, baselines e validação}
+\subsection{Modelos, referências de comparação e validação}
 
-Foram comparados DummyRegressor, Ridge, RandomForestRegressor e MLPRegressor,
-implementados com scikit-learn \cite{pedregosa2011scikit}. Categorias recebem
-one-hot encoding e variáveis numéricas são padronizadas dentro de cada fold. A
-MLP possui duas camadas ocultas, com larguras $(32,16)$ ou $(64,32)$ e
-$\alpha\in\{10^{-3},10^{-2}\}$. Para Ridge,
-$\alpha\in\{0{,}1,1,10\}$; para Random Forest, testam-se profundidade livre ou
-8 e folhas mínimas de 1 ou 2, com 300 árvores.
+Comparamos DummyRegressor, Ridge, RandomForestRegressor e MLPRegressor. Aplicamos
+codificação \textit{one-hot}
+às categorias e padronização às variáveis numéricas dentro de cada divisão. A
+busca de hiperparâmetros considera MLPs com camadas $(32,16)$ ou $(64,32)$ e
+$\alpha\in\{10^{-3},10^{-2}\}$; Ridge com
+$\alpha\in\{0{,}1,1,10\}$; e Random Forest com 300 árvores, profundidade livre
+ou 8 e folhas mínimas de 1 ou 2.
 
-O protocolo principal usa cinco folds externos agrupados por
-molécula--distância. As 18 configurações de uma geometria permanecem juntas em
-treino ou teste. Cada fold externo contém busca de hiperparâmetros com três
-folds internos também agrupados. Comparam-se seleção aleatória, melhor
-configuração global e melhor configuração por molécula, ambas calculadas
-somente no treino, além do oráculo do grid completo. Uma ablação repete os
-mesmos folds sem o identificador molecular. Por fim, o protocolo
-leave-one-molecule-out remove uma molécula inteira e seu identificador do treino.
+Na avaliação principal, os dados são separados cinco vezes, sempre agrupados
+por molécula e distância. Assim, as 18 configurações de uma geometria ficam
+juntas no treino ou no teste. Em cada separação, os hiperparâmetros são escolhidos
+com outras três divisões, também agrupadas. O recomendador é comparado com a
+seleção aleatória, a melhor configuração geral e a melhor configuração de cada
+molécula, calculadas apenas com os dados de treino. Também mostramos o melhor
+resultado possível quando toda a busca é conhecida. Para entender a importância
+do nome da molécula, repetimos a avaliação sem essa informação. Por fim, outro
+teste retira uma molécula inteira do treino.
 
 MAE e RMSE são calculados em kcal/mol após a transformação inversa; MAE e
-$R^2$ log são calculados no alvo $y$. Para top-1, top-3 e top-5, medem-se
-cobertura de precisão química, menor erro selecionado e regret frente ao melhor
-candidato. A fração $(18-k)/18$ mede apenas candidatos evitados na inferência,
-não tempo ou custo quântico. Intervalos usam mil reamostragens de geometrias.
-Para a diferença MLP--baseline, reporta-se também bootstrap pareado por
-geometria e uma análise conservadora que reamostra as três moléculas como
-clusters.
-
-\subsection{Implementação e artefatos}
-
-Foram usados Python 3.11.15, Qiskit 2.3.0 \cite{javadi2024qiskit}, Qiskit
-Algorithms 0.4.0, Qiskit Nature 0.7.2 \cite{qiskitnature2026}, PySCF 2.13.0 e
-scikit-learn 1.9.0. A rotina reproduz o dataset consolidado, predições fora de
-amostra, hiperparâmetros, métricas e figuras. Caches FCI/CASCI e VQE permitem
-rastrear cada rótulo. O repositório público e suas instruções tiveram o
-endereço omitido durante a revisão duplo-anônima e serão identificados na
-versão final.
+$R^2$ também são calculados na escala logarítmica de $y$. Para top-1, top-3 e
+top-5, medimos quantas
+geometrias atingem precisão química, o menor erro entre os candidatos escolhidos
+e a diferença para o melhor candidato disponível. A fração $(18-k)/18$ indica
+somente quantos candidatos deixam de ser testados, não a economia de tempo ou de
+custo quântico. Os intervalos de confiança usam mil reamostragens
+(\textit{bootstrap}). Na comparação entre MLP e as estratégias simples, as
+reamostragens preservam os pares de resultados de cada geometria. Também fazemos
+uma análise mais conservadora, reamostrando as três moléculas como grupos.
